@@ -36,6 +36,7 @@ from aigis_agents.mesh.audit_layer import AuditLayer
 from aigis_agents.mesh.domain_knowledge import DomainKnowledgeRouter
 from aigis_agents.mesh.memory_manager import MemoryManager
 from aigis_agents.mesh.toolkit_registry import ToolkitRegistry
+from aigis_agents.shared.llm_bridge import get_chat_model
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,6 @@ class AgentBase:
         _audit_model = audit_model or defaults.get("audit_model", "gpt-4.1-mini")
 
         # ── 3: Instantiate LLMs ───────────────────────────────────────────────
-        from aigis_agents.shared.llm_bridge import get_chat_model
         main_llm  = get_chat_model(_main_model,  session_keys={"OPENAI_API_KEY": main_api_key}  if main_api_key  else None)
         audit_llm = get_chat_model(_audit_model, session_keys={"OPENAI_API_KEY": audit_api_key} if audit_api_key else None)
         audit_layer = AuditLayer(audit_llm)

@@ -770,7 +770,7 @@ class Agent04(AgentBase):
             "flag_count_critical":          summary.flag_count_critical,
             "flag_count_warning":           summary.flag_count_warning,
             "flags": [
-                {"severity": f.severity, "message": f.message, "metric": f.metric_name}
+                {"severity": f.severity, "message": f.message, "metric": f.metric}
                 for f in flags
             ],
             "sensitivity_variables": len(sensitivity_rows),

@@ -353,6 +353,9 @@ def upsert_deal(
         VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(deal_id) DO UPDATE SET
             deal_name = excluded.deal_name,
+            deal_type = excluded.deal_type,
+            jurisdiction = excluded.jurisdiction,
+            agent_version = excluded.agent_version,
             updated_at = excluded.updated_at
         """,
         (deal_id, deal_name, deal_type, jurisdiction, now, now, agent_version),

@@ -34,3 +34,13 @@ dev-dependencies = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "tests"]
+addopts = "-v --tb=short"
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests requiring multiple components",
+    "slow: Tests that build real Excel/PDF fixtures",
+]
