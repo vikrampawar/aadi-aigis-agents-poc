@@ -1,3 +1,6 @@
+# Secrets
+.env
+
 # Runtime outputs — per-deal UUID folders and registry
 outputs/
 

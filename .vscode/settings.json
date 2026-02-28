@@ -1,0 +1,30 @@
+{
+  // Open markdown files in preview by default
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor"
+  },
+
+  // Markdown editing
+  "markdown.preview.fontSize": 14,
+  "markdown.preview.lineHeight": 1.6,
+  "markdown.validate.enabled": true,
+  "markdown.editor.pasteUrlAsFormattedLink.enabled": "smart",
+
+  // Word wrap for markdown files
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.wordWrapColumn": 100,
+    "editor.quickSuggestions": {
+      "other": false,
+      "comments": false,
+      "strings": false
+    },
+    "editor.rulers": [],
+    "editor.tabSize": 2
+  },
+
+  // File associations
+  "files.associations": {
+    "*.md": "markdown"
+  }
+}
