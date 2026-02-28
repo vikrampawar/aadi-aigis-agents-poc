@@ -1,0 +1,74 @@
+{
+  "_comment": "Project Coulomb — Shell Offshore Inc. deepwater GoM producing asset (MC613 + MC657). Shell holds 100% WI (87.5% NRI). NSAI PRMS Report as of June 30, 2018 by Netherland Sewell & Associates. TSB decom study September 2018. P&L from VDR. Evaluation date: October 2018.",
+
+  "deal_id": "00000000-0000-0000-0000-c005a2000001",
+  "deal_name": "Project Coulomb",
+  "deal_type": "producing_asset",
+  "jurisdiction": "GoM",
+  "buyer": "Statler Group",
+  "evaluation_years": 20,
+  "discount_rate_pct": 10.0,
+
+  "price": {
+    "oil_price_usd_bbl": 65.00,
+    "gas_price_usd_mmbtu": 3.20,
+    "ngl_price_pct_wti": 0.0,
+    "apply_differential_usd_bbl": -2.00
+  },
+
+  "production": {
+    "initial_rate_boepd": 22000,
+    "oil_fraction": 0.54,
+    "gas_fraction": 0.46,
+    "ngl_fraction": 0.00,
+    "decline_rate_annual_pct": 15.0,
+    "decline_type": "exponential",
+    "b_factor": 0.0,
+    "economic_limit_bopd": 500.0,
+    "uptime_pct": 92.0
+  },
+
+  "fiscal": {
+    "regime": "concessionary_royalty_tax",
+    "royalty_rate_pct": 12.5,
+    "severance_tax_pct": 0.0,
+    "income_tax_rate_pct": 21.0,
+    "wi_pct": 100.0,
+    "orri_pct": 0.0
+  },
+
+  "costs": {
+    "loe_per_boe": 7.00,
+    "g_and_a_per_boe": 1.50,
+    "workovers_annual_usd": 2000000,
+    "transport_per_boe": 1.50
+  },
+
+  "capex": {
+    "acquisition_cost_usd": 700000000,
+    "development_capex_by_year_usd": [0, 0, 0, 0, 0],
+    "abandonment_cost_p50_usd": 76198020,
+    "abandonment_cost_p70_usd": 91437624,
+    "abandonment_year": null
+  },
+
+  "reserves": {
+    "pdp_mmboe": 48.3,
+    "p1_mmboe": 48.3,
+    "p2_mmboe": 89.6,
+    "ev_usd": 700000000
+  },
+
+  "rbl": null,
+
+  "_sources": {
+    "nsai_report": "NSAI Shell Coulomb PRMS Rpt.pdf — Netherland Sewell & Associates, Aug 27 2018. PDP PV10=$1.026B (at Shell price deck $59-75/bbl). 1P=48.3 MMBoe, 2P=89.6 MMBoe.",
+    "pl_summary": "Coulomb_PL Summary_2016-2018 Sept YTD. 2016 opex=$18.9M, 2017=$29.5M, 2018 9m=$16.9M. 2018 Q3 avg production=~24k boepd (100% WI).",
+    "decom_study": "2018 Coulomb Decom Study Rev2.pdf — TSB Offshore. Total P50 ARO=$76.2M (MC657 C2=$23.4M, C4=$23.7M, MC613 C003=$23.5M, pipelines/jumpers=$5.6M).",
+    "lease": "3 1 Coulomb LEASE DESCRIPTION.pdf. Shell Offshore Inc. 100% WI, 87.5% NRI. GoM federal royalty 12.5% (MMS/BOEM). MC613 OCS-G 19974 (1998), MC657 OCS-G 08496 (1986). Held by production.",
+    "price_deck_notes": "WTI $65/bbl (spot Oct 2018). Shell NSAI deck used $59.30→$75/bbl escalating. Differential $2/bbl transport/quality.",
+    "production_notes": "H2 2018 NSAI: 4,421.9 MBOE in 184 days = 24,032 bopd annualised (100% WI). Production mix H2-2018: 53.5% oil / 46.5% gas-BOE. Decline 15%/yr derived from NSAI profile: 2019 16,194 bopd → 2024 6,299 bopd = -16.6%/yr CAGR. Uptime 92% (Shell-operated deepwater).",
+    "loe_notes": "NSAI-implied PDP LOE $5.3-5.8/BOE at high production rates (2019-2020). Using $7/BOE to reflect buyer takeover and lower-production periods. Pipeline tariffs $1.50/BOE from historical P&L avg ($1.1-1.8/BOE 2016-2018).",
+    "acquisition_notes": "Bid price $700M = 68% of NSAI PDP PV10 ($1.026B at Shell deck). Equivalent to ~$14.50/BOE of PDP reserves (48.3 MMBOE). Within typical deepwater GoM producing asset range ($10-25/BOE PDP)."
+  }
+}

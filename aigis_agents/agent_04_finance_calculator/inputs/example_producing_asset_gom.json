@@ -1,0 +1,64 @@
+{
+  "_comment": "Project Corsair (Byron Energy GoM) — approximate parameters from Aigis mindmap 27-Feb-2026",
+  "_notes": [
+    "Production: 1,354 boepd net (83% oil, 10% gas, 7% NGL), Sep-25 average",
+    "Valuation: PDP PV-10 $51.4M, 1P $103.6M, 2P $231.1M (per CPR)",
+    "Statler bid recommendation: $30–34M",
+    "ARO: P50 $9.7M, P70 $13.4M (jumped from $5.5M due to new wells + pipeline)",
+    "GoM royalty: 12.5% (historic leases) — verify per lease schedule",
+    "Day-1 liabilities: ~$8.8M (vendor AP $5M + director/SH loan $3.8M) — NOT included in CAPEX here",
+    "Fiscal: US federal royalty + CT 21%; no state severance on OCS federal leases"
+  ],
+  "deal_id": "00000000-0000-0000-0000-c005a1000002",
+  "deal_name": "Project Corsair",
+  "deal_type": "producing_asset",
+  "jurisdiction": "GoM",
+  "buyer": "Statler Energy",
+  "evaluation_years": 20,
+  "discount_rate_pct": 10.0,
+  "price": {
+    "oil_price_usd_bbl": 70.0,
+    "gas_price_usd_mmbtu": 3.0,
+    "ngl_price_pct_wti": 35.0,
+    "apply_differential_usd_bbl": -1.50
+  },
+  "production": {
+    "initial_rate_boepd": 1354,
+    "oil_fraction": 0.83,
+    "gas_fraction": 0.10,
+    "ngl_fraction": 0.07,
+    "decline_rate_annual_pct": 15.0,
+    "decline_type": "exponential",
+    "b_factor": 0.0,
+    "economic_limit_bopd": 5.0,
+    "uptime_pct": 95.0
+  },
+  "fiscal": {
+    "regime": "concessionary_royalty_tax",
+    "royalty_rate_pct": 12.5,
+    "severance_tax_pct": 0.0,
+    "income_tax_rate_pct": 21.0,
+    "wi_pct": 100.0,
+    "orri_pct": 0.0
+  },
+  "costs": {
+    "loe_per_boe": 18.0,
+    "g_and_a_per_boe": 3.0,
+    "workovers_annual_usd": 500000,
+    "transport_per_boe": 1.50
+  },
+  "capex": {
+    "acquisition_cost_usd": 32000000,
+    "development_capex_by_year_usd": [2000000, 5000000, 3000000],
+    "abandonment_cost_p50_usd": 9700000,
+    "abandonment_cost_p70_usd": 13400000,
+    "abandonment_year": null
+  },
+  "reserves": {
+    "pdp_mmboe": 2.5,
+    "p1_mmboe": 5.2,
+    "p2_mmboe": 11.6,
+    "ev_usd": 32000000
+  },
+  "rbl": null
+}

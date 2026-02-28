@@ -1,0 +1,156 @@
+[
+  {
+    "proposal_id": "034ca8d9-0946-45fb-aa2a-96ea91318244",
+    "deal_id": "00000000-0000-0000-0000-c005a1000002",
+    "run_timestamp": "2026-02-27T11:24:17.641695+00:00",
+    "filenames": [
+      "4.10.1 Byron Energy Stucture and commnets intercompany loan summary.pdf"
+    ],
+    "folder_path": "4 Accounting & Finance\\4.10 Shareholder Loan Agreements",
+    "suggested_category": "financial",
+    "suggested_item_description": "Shareholder loan agreements and intercompany financing arrangements",
+    "suggested_tier": "need_to_have",
+    "applicable_deal_types": [
+      "producing_asset",
+      "development",
+      "corporate"
+    ],
+    "reasoning": "Shareholder loans are critical for understanding the capital structure, related party transactions, and potential liabilities that transfer with the asset or entity",
+    "status": "accepted",
+    "reviewed_at": "2026-02-27T11:34:16.220913"
+  },
+  {
+    "proposal_id": "6ad628d8-f5ec-4fd6-88ea-9ebc1aa4cc8f",
+    "deal_id": "00000000-0000-0000-0000-c005a1000002",
+    "run_timestamp": "2026-02-27T11:24:17.641695+00:00",
+    "filenames": [
+      "4.9.1.2 EXECUTED - Officer's Certificate - Byron, BELLC, & BEL (7-28-2023) - with compiled Exhibits(6129720.1).pdf",
+      "4.9.1.4 EXECUTED GUARANTY(6129732.1).pdf",
+      "4.9.1.5 EXECUTED LOAN AGREEMENT(6129729.2).pdf",
+      "4.9.1.6 EXECUTED Security Agreement(6129734.1).pdf",
+      "4.9.1.7 Mortgage-Eff Date (7-28-2023).pdf"
+    ],
+    "folder_path": "4 Accounting & Finance\\4.9 Shell Facility Agreements\\4.9.1 Loan and Security Agreements",
+    "suggested_category": "financial",
+    "suggested_item_description": "Third-party debt facilities and credit agreements",
+    "suggested_tier": "need_to_have",
+    "applicable_deal_types": [
+      "producing_asset",
+      "development",
+      "corporate"
+    ],
+    "reasoning": "External debt facilities are essential for understanding leverage, covenants, change of control provisions, and financing obligations that may impact or transfer with the transaction",
+    "status": "accepted",
+    "reviewed_at": "2026-02-27T11:34:16.220913"
+  },
+  {
+    "proposal_id": "e83590c8-7ec1-4af2-8b27-81745f3f0b19",
+    "deal_id": "00000000-0000-0000-0000-c005a1000002",
+    "run_timestamp": "2026-02-27T11:24:17.641695+00:00",
+    "filenames": [
+      "5.8.1.17 N-9000142 - SM58 G6.pdf",
+      "5.8.1.2 Bryon Security Agreement Escrow Account _INIC_Final_fully executed.pdf",
+      "5.8.1.3 N-9000002 Replac Bond Areawide GOM.pdf",
+      "5.8.1.4 N-9000003 Replac Bond Lease Specif L#34266.pdf",
+      "5.8.1.5 N-9000004 Replac Bond Sup L#34266.pdf"
+    ],
+    "folder_path": "5 Land, Legal & Commercial\\5.8 Bonding - Escrow\\5.8.1 Active Bonds & Escrow Security",
+    "suggested_category": "legal",
+    "suggested_item_description": "Performance bonds and escrow security arrangements",
+    "suggested_tier": "need_to_have",
+    "applicable_deal_types": [
+      "producing_asset",
+      "development",
+      "exploration"
+    ],
+    "reasoning": "Bonds and escrow arrangements are critical legal obligations that secure regulatory compliance and operational performance, directly impacting asset transferability and ongoing obligations",
+    "status": "accepted",
+    "reviewed_at": "2026-02-27T11:34:16.220913"
+  },
+  {
+    "proposal_id": "814d96cd-fb63-40eb-86f2-8e8104b82167",
+    "deal_id": "00000000-0000-0000-0000-c005a1000002",
+    "run_timestamp": "2026-02-27T11:24:17.641695+00:00",
+    "filenames": [
+      "8.4.1 Byron 425 Settlers Trace Lease with 2nd Amendment.pdf"
+    ],
+    "folder_path": "8 Human Resources\\8.4 Office Lease Contracts",
+    "suggested_category": "contracts",
+    "suggested_item_description": "Office lease agreements and real estate contracts",
+    "suggested_tier": "good_to_have",
+    "applicable_deal_types": [
+      "corporate"
+    ],
+    "reasoning": "Office leases represent ongoing operational commitments and costs that are relevant for corporate acquisitions to understand overhead obligations and potential assignment requirements",
+    "status": "accepted",
+    "reviewed_at": "2026-02-27T11:34:16.220913"
+  },
+  {
+    "proposal_id": "222cd25f-30b1-425b-afd6-82f1ea872625",
+    "deal_id": "00000000-0000-0000-0000-c005a1000002",
+    "run_timestamp": "2026-02-27T11:24:17.641695+00:00",
+    "filenames": [
+      "8.5.1.1.10 10- Directed_Trustee_Agreement_(1).pdf",
+      "8.5.1.1.11 11- Byron_Energy_LLC_-_Fees_404A5_-_2022-05-04.pdf",
+      "8.5.1.1.12 12- Byron_Energy_LLC_-_Fees_408B2_-_2022-05-04.pdf",
+      "8.5.1.1.14 14- Vestwell_Post_PPA_QDRO_Procedures_(1).pdf",
+      "8.5.1.1.15 15- Vestwell_Post_PPA_Base_Plan_Document_(1).pdf"
+    ],
+    "folder_path": "8 Human Resources\\8.5 Employee Benefits\\8.5.1 Byron 401k\\8.5.1.1 Vestwell agreements_executed 05.04.2022",
+    "suggested_category": "hr_key_person",
+    "suggested_item_description": "Employee benefit plan agreements and retirement plans",
+    "suggested_tier": "good_to_have",
+    "applicable_deal_types": [
+      "corporate"
+    ],
+    "reasoning": "401k and benefit plan agreements are important for corporate deals to understand employee obligations, fiduciary responsibilities, and transition requirements for benefit programs",
+    "status": "accepted",
+    "reviewed_at": "2026-02-27T11:34:16.220913"
+  },
+  {
+    "proposal_id": "1922d702-9abd-465e-b051-7e071b7ff3a9",
+    "deal_id": "b4b71f51-0c39-47a8-b6dc-d1639702357d",
+    "run_timestamp": "2026-02-27T11:44:49.697824+00:00",
+    "filenames": [
+      "565A-00-661B1.pdf",
+      "565A-00-661B2.pdf",
+      "565A-00-661B3.pdf",
+      "565A-00-661H3.pdf",
+      "565A-00-661J1-R3.pdf"
+    ],
+    "folder_path": "9.0 Facilities\\9.1 Mechanical Drawings\\661 P&ID - Coulomb Interfaces",
+    "suggested_category": "technical",
+    "suggested_item_description": "Facility P&IDs and mechanical drawings",
+    "suggested_tier": "good_to_have",
+    "applicable_deal_types": [
+      "producing_asset",
+      "development"
+    ],
+    "reasoning": "Process and instrumentation diagrams are critical technical documents for understanding facility operations, maintenance requirements, and operational risks. Essential for technical due diligence on producing assets with processing facilities.",
+    "status": "accepted",
+    "reviewed_at": "2026-02-27T11:55:38.137689"
+  },
+  {
+    "proposal_id": "4efa8658-f92d-4d22-a5a2-5234633a79b4",
+    "deal_id": "b4b71f51-0c39-47a8-b6dc-d1639702357d",
+    "run_timestamp": "2026-02-27T11:44:49.697824+00:00",
+    "filenames": [
+      "Coulomb PH II Subsea Truss Jumper on Beach.pdf",
+      "DSC02510.pdf",
+      "DSC02513.pdf",
+      "DSC02525.pdf",
+      "DSC02532.pdf"
+    ],
+    "folder_path": "9.0 Facilities\\9.2 Platform Pictures",
+    "suggested_category": "technical",
+    "suggested_item_description": "Facility photographs and visual documentation",
+    "suggested_tier": "good_to_have",
+    "applicable_deal_types": [
+      "producing_asset",
+      "development"
+    ],
+    "reasoning": "Visual documentation of facilities provides valuable context for asset condition assessment and helps validate technical reports, though not absolutely critical if detailed inspection reports are available.",
+    "status": "accepted",
+    "reviewed_at": "2026-02-27T11:55:38.137689"
+  }
+]

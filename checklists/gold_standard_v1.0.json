@@ -1,0 +1,707 @@
+{
+  "version": "v1.0",
+  "last_updated": "2026-02-27",
+  "categories": {
+
+    "corporate": {
+      "label": "Corporate & Ownership",
+      "items": [
+        {
+          "id": "corp_001",
+          "description": "Operating licences / lease documents / block awards",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "GoM": "OCS lease from BOEM; confirm active status in BSEE TIMS",
+            "UKCS": "Licence from NSTA; confirm MWO (minimum work obligations) status",
+            "Norway": "PDO/APA licence from NPD; confirm block relinquishment schedule"
+          },
+          "search_keywords": ["licence", "license", "OCS", "block award", "PDO", "operating licence", "OCS-G", "federal lease", "block assignment"],
+          "doc_types": ["regulatory_filing"],
+          "age_threshold_years": null,
+          "notes": "Current licence required. Expired or expiring (<2yr) scored Partial.",
+          "drl_request_text": "Please provide copies of all current operating licences, lease documents, and block awards for the assets in scope, together with any renewal documentation, extensions, and correspondence with the regulator regarding licence status."
+        },
+        {
+          "id": "corp_002",
+          "description": "Corporate entity structure / organisation chart",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["org chart", "organisation chart", "organization chart", "entity structure", "corporate structure", "ownership structure", "group structure", "subsidiaries"],
+          "doc_types": ["corporate_presentation"],
+          "age_threshold_years": 2,
+          "notes": "Must show full upstream ownership chain to seller parent.",
+          "drl_request_text": "Please provide a current corporate structure chart showing all entities within the group that hold an interest in the assets, including percentage ownership at each level, jurisdiction of incorporation, and the ultimate beneficial owner."
+        },
+        {
+          "id": "corp_003",
+          "description": "Certificate of incorporation / company registration documents",
+          "tier": { "producing_asset": "good_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["certificate of incorporation", "company registration", "articles of incorporation", "memorandum", "articles of association", "company formation"],
+          "doc_types": ["legal_opinion"],
+          "age_threshold_years": null,
+          "notes": "Critical for corporate deals; less so for pure asset purchases.",
+          "drl_request_text": "Please provide certificates of incorporation and current constitutional documents (articles of association or equivalent) for all entities within scope of the transaction."
+        },
+        {
+          "id": "corp_004",
+          "description": "Shareholder agreement / unitisation agreement (USA)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "GoM": "Check for ROFR/ROFO provisions triggered by change of control",
+            "UKCS": "Unitisation and Unit Operating Agreement (UUOA) if applicable"
+          },
+          "search_keywords": ["shareholder agreement", "unitisation", "unit agreement", "ROFR", "ROFO", "right of first refusal", "right of first offer", "inter-party agreement", "co-venturers agreement"],
+          "doc_types": ["joa"],
+          "age_threshold_years": null,
+          "notes": "Must review for ROFR/ROFO provisions that could be triggered by this transaction.",
+          "drl_request_text": "Please provide all shareholder agreements, unitisation agreements, and inter-party agreements relating to the assets, including any amendments. Please confirm whether any right of first refusal or right of first offer provisions are in place and the applicable notice/response periods."
+        },
+        {
+          "id": "corp_005",
+          "description": "Board minutes and resolutions (last 2 years)",
+          "tier": { "producing_asset": "good_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["board minutes", "board resolutions", "directors resolution", "board meeting", "shareholder resolution", "extraordinary general meeting", "EGM"],
+          "doc_types": ["corporate_presentation"],
+          "age_threshold_years": 2,
+          "notes": "Required for corporate deals to confirm no material undisclosed decisions.",
+          "drl_request_text": "Please provide board minutes and material resolutions for the past two years for all entities in scope, redacted for commercially sensitive matters unrelated to the assets."
+        }
+      ]
+    },
+
+    "technical": {
+      "label": "Technical (Reserves, G&G, Wells)",
+      "items": [
+        {
+          "id": "tech_001",
+          "description": "Competent Person's Report (CPR) / Independent Reserves Report",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "GoM": "Should be SEC-compliant (Rule 4-10); check certifier is SEC-qualified",
+            "UKCS": "Typically SPE-PRMS. Check NSTA conformance",
+            "Norway": "Must comply with NPD resource classification framework"
+          },
+          "search_keywords": ["CPR", "competent person", "reserves report", "reserve report", "independent reserves", "reserve certification", "RPS", "Gaffney", "DeGolyer", "Ryder Scott", "Sproule", "NSAI", "Calarini", "IHS Markit", "Cawley", "Cawley Gillespie", "reserve evaluation", "reserves evaluation"],
+          "doc_types": ["reserves_report"],
+          "age_threshold_years": 3,
+          "notes": "Must be by a qualified independent petroleum engineer. Age >3yr scored Partial.",
+          "drl_request_text": "Please provide the most recent Competent Person's Report (CPR) or Independent Reserves Report prepared by a qualified independent petroleum consultant, including reserves certification, production profiles, and price assumptions. Please also confirm the effective date and whether any updated estimates have been prepared since."
+        },
+        {
+          "id": "tech_002",
+          "description": "Geological & geophysical (G&G) technical reports",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["geological", "geophysical", "G&G", "reservoir study", "petrophysical", "geomechanical", "fault study", "structural interpretation", "subsurface"],
+          "doc_types": ["seismic_report", "reserves_report"],
+          "age_threshold_years": 5,
+          "notes": "Key to verifying subsurface risk and upside.",
+          "drl_request_text": "Please provide all geological and geophysical technical reports for the assets, including reservoir studies, petrophysical evaluations, and any recent subsurface interpretation updates. Please indicate which studies are field-specific and which are basin-wide."
+        },
+        {
+          "id": "tech_003",
+          "description": "Seismic data and interpretation (licence confirmed)",
+          "tier": { "producing_asset": "good_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["seismic", "3D seismic", "2D seismic", "seismic interpretation", "horizon interpretation", "seismic licence", "PSDM", "AVO", "pre-stack", "time migration", "depth migration"],
+          "doc_types": ["seismic_report"],
+          "age_threshold_years": 10,
+          "notes": "Confirm transferability of seismic data licence as part of the transaction.",
+          "drl_request_text": "Please provide all seismic data and interpretation reports (2D and 3D) available for the assets, together with the associated data licence agreements. Please confirm whether the seismic data licences are transferable to a buyer without additional cost."
+        },
+        {
+          "id": "tech_004",
+          "description": "Well logs and completion reports (per well)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["well log", "LAS file", "wireline log", "completion report", "end of well report", "EOWR", "petrophysical log", "mudlog", "gamma ray", "resistivity log"],
+          "doc_types": ["well_log"],
+          "age_threshold_years": null,
+          "notes": "Historical logs are permanent records; age threshold not applicable.",
+          "drl_request_text": "Please provide digital well logs (LAS format preferred), end-of-well reports, and completion reports for all wells within the assets, including any wells that are currently suspended or have been permanently abandoned."
+        },
+        {
+          "id": "tech_005",
+          "description": "SCAL (Special Core Analysis) data",
+          "tier": { "producing_asset": "good_to_have", "exploration": "good_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["SCAL", "core analysis", "special core analysis", "relative permeability", "capillary pressure", "porosity permeability", "routine core analysis", "RCAL"],
+          "doc_types": ["seismic_report"],
+          "age_threshold_years": null,
+          "notes": "Critical for development assets where reservoir modelling is required.",
+          "drl_request_text": "Please provide all Special Core Analysis (SCAL) and Routine Core Analysis (RCAL) data and reports for the reservoir intervals in scope."
+        },
+        {
+          "id": "tech_006",
+          "description": "Field Development Plan (FDP) / Approved Development Plan",
+          "tier": { "producing_asset": "good_to_have", "exploration": "good_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "UKCS": "FDP requires NSTA approval; check approval status and any conditions",
+            "Norway": "PDO (Plan for Development and Operation) required; check NPD approval"
+          },
+          "search_keywords": ["field development plan", "FDP", "development plan", "PDO", "plan for development", "approved development", "development concept"],
+          "doc_types": ["reserves_report", "corporate_presentation"],
+          "age_threshold_years": 5,
+          "notes": "FDP approval status critically important in UKCS/Norway.",
+          "drl_request_text": "Please provide the current Field Development Plan (FDP) or equivalent planning document, together with any regulatory approvals, conditions imposed, and correspondence with the competent authority regarding the development programme."
+        }
+      ]
+    },
+
+    "production": {
+      "label": "Production Data",
+      "items": [
+        {
+          "id": "prod_001",
+          "description": "Historical production data — well-by-well monthly (CSV/XLS)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["production data", "production history", "monthly production", "well production", "oil production", "gas production", "BOE", "bopd", "MMSCFD", "MCFD"],
+          "doc_types": ["production_data"],
+          "age_threshold_years": null,
+          "notes": "Minimum 3 years preferred; all available history requested.",
+          "multi_document": true,
+          "drl_request_text": "Please provide historical production data on a well-by-well basis, including gross oil, gas, and water production in monthly intervals, for the full life-of-field where available (minimum 3 years). Please include API numbers, UWIs, or equivalent well identifiers. Electronic format (CSV or Excel) is preferred."
+        },
+        {
+          "id": "prod_002",
+          "description": "Operator monthly production reports / LOE statements",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["LOE", "lease operating expense", "operator report", "monthly report", "production report", "prod report", "well totals", "production summary", "JIB", "joint interest billing", "run ticket", "gauge ticket"],
+          "doc_types": ["production_data", "financial_model"],
+          "age_threshold_years": 1,
+          "notes": "Last 12–24 months most relevant; confirms actuals vs CPR forecast.",
+          "drl_request_text": "Please provide the most recent 24 months of operator monthly production reports and lease operating expense (LOE) statements, including joint interest billings (JIBs). These should reconcile to the audited accounts."
+        },
+        {
+          "id": "prod_003",
+          "description": "Facility uptime and efficiency records",
+          "tier": { "producing_asset": "good_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["uptime", "downtime", "production efficiency", "facility report", "shutdown report", "turnaround", "planned maintenance", "unplanned downtime", "facility availability"],
+          "doc_types": ["production_data"],
+          "age_threshold_years": 3,
+          "notes": "Identifies production interruption risk and maintenance backlog.",
+          "drl_request_text": "Please provide facility uptime and production efficiency records for the last 3 years, including a summary of planned and unplanned shutdowns, the cause of each downtime event, and the production volumes deferred."
+        },
+        {
+          "id": "prod_004",
+          "description": "Production forecast (seller / operator base case)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["production forecast", "type curve", "decline curve", "production profile", "base case", "forecast volumes", "actual vs forecast", "plateau rate", "first production"],
+          "doc_types": ["reserves_report", "financial_model"],
+          "age_threshold_years": 3,
+          "notes": "Must be reconcilable to CPR production profiles.",
+          "drl_request_text": "Please provide the seller's or operator's base-case production forecast in electronic format (Excel preferred), showing gross and net production by well or field on an annual basis, including the key assumptions underpinning the forecast."
+        }
+      ]
+    },
+
+    "commercial": {
+      "label": "Commercial (IM, Offtake, Sales)",
+      "items": [
+        {
+          "id": "comm_001",
+          "description": "Information Memorandum (IM) / Teaser",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["information memorandum", "IM", "teaser", "confidential information memorandum", "CIM", "offering memorandum"],
+          "doc_types": ["corporate_presentation"],
+          "age_threshold_years": 2,
+          "notes": "Primary deal document — confirms asset description and seller's narrative.",
+          "drl_request_text": "Please confirm the Information Memorandum provided is the most current version, and provide any updates or addenda issued since its initial distribution."
+        },
+        {
+          "id": "comm_002",
+          "description": "Management Presentation / technical presentation",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["management presentation", "technical presentation", "investor presentation", "asset overview", "roadshow", "slide deck", "PowerPoint"],
+          "doc_types": ["corporate_presentation"],
+          "age_threshold_years": 2,
+          "notes": "",
+          "drl_request_text": "Please provide the most recent Management Presentation and any technical presentation materials used in management meetings."
+        },
+        {
+          "id": "comm_003",
+          "description": "Oil / gas / NGL sales agreements and offtake contracts",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "GoM": "Check take-or-pay provisions and any pipeline capacity commitments"
+          },
+          "search_keywords": ["sales agreement", "offtake agreement", "crude oil sales", "gas sales", "NGL sales", "ISDA", "swap agreement", "hedging contract", "marketing agreement", "term contract"],
+          "doc_types": ["spa", "joa"],
+          "age_threshold_years": null,
+          "notes": "Review for pricing formula, duration, take-or-pay obligations, termination rights.",
+          "drl_request_text": "Please provide all oil, gas, and NGL sales agreements, offtake contracts, and marketing arrangements currently in effect, including any amendments, side letters, and hedging arrangements. Please provide a summary of any take-or-pay obligations outstanding."
+        },
+        {
+          "id": "comm_004",
+          "description": "Gas gathering, processing, and transportation agreements",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["gas gathering", "gas processing", "transportation agreement", "pipeline agreement", "gathering agreement", "GPA", "GTA", "firm transport", "interruptible transport", "midstream"],
+          "doc_types": ["joa", "spa"],
+          "age_threshold_years": null,
+          "notes": "Check expiry vs. life-of-field; capacity constraints are material.",
+          "drl_request_text": "Please provide all gas gathering, processing, and transportation agreements, together with any capacity booking confirmations and correspondence with pipeline operators regarding future capacity availability."
+        }
+      ]
+    },
+
+    "financial": {
+      "label": "Financial (Accounts, Budgets, Models)",
+      "items": [
+        {
+          "id": "fin_001",
+          "description": "Audited financial statements (3 years minimum)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["audited accounts", "audited financial statements", "annual report", "statutory accounts", "balance sheet", "income statement", "financial statements", "consolidated financial", "P&L", "profit and loss", "audit report"],
+          "doc_types": ["financial_model"],
+          "age_threshold_years": 3,
+          "notes": "3yr minimum; check for qualified opinions or going concern language.",
+          "multi_document": true,
+          "drl_request_text": "Please provide audited financial statements for the last three fiscal years for all entities in scope (or the most recent available), including the auditor's report. If accounts are not yet audited for the most recent period, please provide management accounts for that period."
+        },
+        {
+          "id": "fin_002",
+          "description": "Management accounts (current year to date)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["management accounts", "management financial statements", "internal accounts", "monthly financials", "consolidated monthly", "YTD", "year to date", "monthly accounts", "P&L monthly", "budget vs actual"],
+          "doc_types": ["financial_model"],
+          "age_threshold_years": 1,
+          "notes": "Must be reconcilable to audited accounts.",
+          "drl_request_text": "Please provide the most recent management accounts, including year-to-date income statement, balance sheet, and cash flow statement, with comparatives against budget."
+        },
+        {
+          "id": "fin_003",
+          "description": "Seller's financial model / economic model (Excel)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["financial model", "economic model", "cashflow model", "corporate model", "NPV model", "DCF", "discounted cash flow", "valuation model", "NEWCO model", "NFA model", "Excel model"],
+          "doc_types": ["financial_model"],
+          "age_threshold_years": 2,
+          "notes": "Request with all formulae unlocked. Check price deck assumptions.",
+          "drl_request_text": "Please provide the seller's financial model (in Excel with all formulae unlocked), including the production forecast, price deck, OPEX/CAPEX schedule, fiscal terms, and NPV/IRR outputs. Please confirm the effective date and price deck source (strip, management, or budget)."
+        },
+        {
+          "id": "fin_004",
+          "description": "Budget vs actual OPEX/CAPEX (last 3 years)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["budget", "OPEX", "CAPEX", "capital expenditure", "operating expenditure", "AFE", "authorisation for expenditure", "LOE budget", "variance", "budget vs actual"],
+          "doc_types": ["financial_model"],
+          "age_threshold_years": 3,
+          "notes": "Track record of cost delivery is a key valuation risk.",
+          "drl_request_text": "Please provide OPEX and CAPEX budget versus actual summaries for the last three years, including an explanation for any material variances. Please also provide the current year budget and the forward capital programme."
+        },
+        {
+          "id": "fin_005",
+          "description": "Tax position / deferred tax schedule",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "UKCS": "Ring-fence status, supplementary charge credits, and investment allowance claims",
+            "Norway": "Uplift claims and refundable exploration tax position",
+            "GoM": "Federal income tax position and any state tax exposure"
+          },
+          "search_keywords": ["tax", "deferred tax", "tax losses", "NOL", "ring fence", "supplementary charge", "uplift", "investment allowance", "tax credit", "income tax", "corporation tax"],
+          "doc_types": ["tax_memo", "financial_model"],
+          "age_threshold_years": 3,
+          "notes": "Tax losses and credits can be material value drivers.",
+          "drl_request_text": "Please provide the current tax position of the entities in scope, including a schedule of tax losses, deferred tax assets/liabilities, and any open tax years. Please also provide any recent correspondence with tax authorities and any tax opinions or rulings relevant to the transaction."
+        }
+      ]
+    },
+
+    "legal": {
+      "label": "Legal (Contracts, Title, Licences)",
+      "items": [
+        {
+          "id": "legal_001",
+          "description": "Joint Operating Agreement(s) — JOA",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "GoM": "Review for ROFR, operator removal threshold, abandonment and decommissioning provisions",
+            "UKCS": "Check UKOA (UKCS Operating Agreement) standard clauses; cash call provisions"
+          },
+          "search_keywords": ["JOA", "joint operating agreement", "operating agreement", "UUOA", "UKOA", "joint venture agreement", "operating committee"],
+          "doc_types": ["joa"],
+          "age_threshold_years": null,
+          "notes": "Must review ROFR/ROFO, operator removal, sole risk, and CoC provisions.",
+          "drl_request_text": "Please provide all Joint Operating Agreements (JOAs) and any amendments, side letters, or supplemental agreements currently in force for each licence. Please confirm working interest percentages as set out in the JOA and identify any provisions that would be triggered by the proposed transaction."
+        },
+        {
+          "id": "legal_002",
+          "description": "Production Sharing Contract(s) / Concession Agreement(s)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["International", "GoM"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["PSC", "production sharing contract", "production sharing agreement", "PSA", "concession agreement", "risk service agreement", "government contract"],
+          "doc_types": ["psc"],
+          "age_threshold_years": null,
+          "notes": "International assets only. Review for cost recovery, profit oil, and government back-in provisions.",
+          "drl_request_text": "Please provide all Production Sharing Contracts (PSCs), concession agreements, or equivalent arrangements with the host government, together with any side letters, ministerial correspondence, and stabilisation provisions."
+        },
+        {
+          "id": "legal_003",
+          "description": "Sale & Purchase Agreement (SPA) / draft or heads of terms",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["SPA", "sale and purchase agreement", "purchase and sale agreement", "PSA", "heads of terms", "HOT", "letter of intent", "LOI", "term sheet", "exclusivity agreement"],
+          "doc_types": ["spa"],
+          "age_threshold_years": 1,
+          "notes": "Review all reps & warranties, indemnities, price adjustments, and closing conditions.",
+          "drl_request_text": "Please provide the most current draft Sale and Purchase Agreement (or Purchase and Sale Agreement), together with any agreed schedules, exhibits, and associated documents including escrow arrangements. Please confirm the proposed effective date and closing conditions."
+        },
+        {
+          "id": "legal_004",
+          "description": "Title opinion / chain of title documents",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "GoM": "BOEM assignment approval required; confirm no outstanding assignments",
+            "UKCS": "NSTA consent to assignment required; check CoA timeline"
+          },
+          "search_keywords": ["title opinion", "chain of title", "title search", "assignment", "consent to assign", "CoA", "title certificate", "deed", "conveyance", "novation"],
+          "doc_types": ["legal_opinion"],
+          "age_threshold_years": null,
+          "notes": "Full chain of title essential. Identify any gaps or un-recorded transfers.",
+          "drl_request_text": "Please provide all documents evidencing the chain of title for the assets, including assignments, deeds of assignment, government approvals, and title opinions. Please identify any outstanding consents to assign required from third parties or regulators in connection with the proposed transaction."
+        },
+        {
+          "id": "legal_005",
+          "description": "Consent to Assign (CoA) requirements and waivers",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["consent to assign", "CoA", "assignment consent", "ROFR waiver", "ROFO waiver", "pre-emption waiver", "co-venturer consent", "government approval"],
+          "doc_types": ["regulatory_filing", "legal_opinion"],
+          "age_threshold_years": null,
+          "notes": "Must be obtained before deal closes. Identify all required consents at outset.",
+          "drl_request_text": "Please confirm all third-party and regulatory consents required for the proposed transaction (including under the JOA, government licences, and any commercial agreements), and provide copies of any pre-emptive right waivers or consent letters already obtained."
+        }
+      ]
+    },
+
+    "environmental": {
+      "label": "Environmental & Regulatory",
+      "items": [
+        {
+          "id": "env_001",
+          "description": "Environmental permits and approvals",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "GoM": "EPA NPDES permit; BSEE SPCC plan; air emissions permit",
+            "UKCS": "Environmental Statement; OPRED emissions permit; SEPA consents",
+            "Norway": "Pollution Control Act permits; flaring consents"
+          },
+          "search_keywords": ["environmental permit", "NPDES", "SPCC", "air permit", "environmental approval", "emissions permit", "discharge permit", "environmental consent", "OPRED", "NEA"],
+          "doc_types": ["environmental_report", "regulatory_filing"],
+          "age_threshold_years": null,
+          "notes": "Any expired permits are a material issue. Review compliance status.",
+          "drl_request_text": "Please provide all current environmental permits, approvals, and authorisations for the assets, including any correspondence with the environmental regulator regarding compliance status. Please flag any permits that are under renewal or where compliance issues have been raised."
+        },
+        {
+          "id": "env_002",
+          "description": "Environmental assessment / environmental impact statement",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["environmental assessment", "EIA", "environmental impact", "EIS", "environmental impact statement", "environmental study", "ESIA", "environmental survey"],
+          "doc_types": ["environmental_report"],
+          "age_threshold_years": 10,
+          "notes": "Review for mitigation commitments still outstanding.",
+          "drl_request_text": "Please provide all Environmental Impact Assessments (EIAs) or Environmental Statements prepared for the assets, including any monitoring reports and evidence that commitments made in those assessments have been discharged."
+        },
+        {
+          "id": "env_003",
+          "description": "Regulatory inspection records and notices of violation (NOVs)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["NOV", "notice of violation", "inspection", "regulatory inspection", "enforcement action", "compliance notice", "infringement", "penalty", "civil penalty"],
+          "doc_types": ["regulatory_filing", "environmental_report"],
+          "age_threshold_years": 5,
+          "notes": "Any open NOVs or enforcement actions are red flags. Request 5yr history.",
+          "drl_request_text": "Please provide all regulatory inspection records, Notices of Violation (NOVs), enforcement actions, and compliance correspondence received in the last five years, together with evidence of corrective actions taken and any outstanding obligations."
+        }
+      ]
+    },
+
+    "aro_decom": {
+      "label": "ARO / Abandonment & Decommissioning",
+      "items": [
+        {
+          "id": "aro_001",
+          "description": "Abandonment & Decommissioning plan / cost estimate",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "GoM": "BSEE decom plan; BOEM bonding requirements; check BSEE TIMS for P&A status",
+            "UKCS": "NSTA approved abandonment programme; check OPRED decom consent"
+          },
+          "search_keywords": ["decommissioning", "decom", "abandonment", "P&A", "plug and abandon", "ARO", "asset retirement obligation", "decom plan", "decom estimate", "abandonment cost"],
+          "doc_types": ["environmental_report", "regulatory_filing"],
+          "age_threshold_years": 5,
+          "notes": "P50/P70/P90 estimates required. Plans >5yr old scored Partial.",
+          "drl_request_text": "Please provide all decommissioning plans and cost estimates for the assets, including the P50, P70, and P90 cost scenarios where available. Please confirm the basis of the estimate, the effective date, and whether the estimate has been reviewed by the regulator."
+        },
+        {
+          "id": "aro_002",
+          "description": "ARO provision in balance sheet / actuarial assessment",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["ARO provision", "decommissioning provision", "asset retirement obligation", "decom liability", "environmental provision", "plugging obligation", "balance sheet provision"],
+          "doc_types": ["financial_model"],
+          "age_threshold_years": 1,
+          "notes": "Compare balance sheet provision to P50/P70 cost estimate. Flag any understatement.",
+          "drl_request_text": "Please provide the ARO or decommissioning provision as recorded in the most recent balance sheet, together with the assumptions used to calculate it, including the discount rate, escalation rate, and expected decommissioning date."
+        },
+        {
+          "id": "aro_003",
+          "description": "Regulatory decommissioning filings (wells past COP)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {
+            "GoM": "BSEE TIMS database; confirm no outstanding P&A obligations past due",
+            "UKCS": "NSTA well status database; confirm no over-held wells"
+          },
+          "search_keywords": ["P&A filing", "well plugging", "abandonment filing", "BSEE filing", "NSTA filing", "well status", "permanently abandoned", "suspended well", "idle iron"],
+          "doc_types": ["regulatory_filing"],
+          "age_threshold_years": null,
+          "notes": "Outstanding P&A obligations past regulatory deadline = critical red flag.",
+          "drl_request_text": "Please provide all regulatory filings confirming the abandonment status of wells that have ceased production, including evidence of satisfactory P&A completion. Please identify any wells currently on suspension and provide the regulatory approval and expected P&A date."
+        }
+      ]
+    },
+
+    "contracts": {
+      "label": "Contracts (Drilling, Services, Midstream)",
+      "items": [
+        {
+          "id": "cont_001",
+          "description": "Drilling contracts and rig commitments",
+          "tier": { "producing_asset": "good_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["drilling contract", "rig contract", "dayrate", "turnkey contract", "drilling programme", "AFE", "well programme", "footage contract"],
+          "doc_types": ["joa"],
+          "age_threshold_years": null,
+          "notes": "Check for minimum commitment periods and early termination fees.",
+          "drl_request_text": "Please provide all current drilling contracts and rig commitments, including any minimum commitment periods, dayrate escalation provisions, and early termination fee schedules."
+        },
+        {
+          "id": "cont_002",
+          "description": "Saltwater disposal (SWD) agreements",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["GoM", "International"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["saltwater disposal", "SWD", "produced water disposal", "injection well", "water disposal agreement", "water handling"],
+          "doc_types": ["joa"],
+          "age_threshold_years": null,
+          "notes": "GoM/onshore assets — SWD capacity is often a production constraint.",
+          "drl_request_text": "Please provide all saltwater disposal (SWD) agreements and permits, including current disposal volumes, contract capacity, and any operational restrictions or constraints relevant to production targets."
+        },
+        {
+          "id": "cont_003",
+          "description": "Pipeline / infrastructure tariff agreements",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["pipeline tariff", "infrastructure agreement", "tie-back agreement", "production handling agreement", "PHA", "processing agreement", "third party processing", "host facility"],
+          "doc_types": ["joa", "spa"],
+          "age_threshold_years": null,
+          "notes": "Check for step-in rights, tariff escalation, and capacity guarantees.",
+          "drl_request_text": "Please provide all pipeline, infrastructure access, and production handling agreements, including tariff schedules, capacity reservations, and any step-in or pre-emption rights."
+        }
+      ]
+    },
+
+    "hr_key_person": {
+      "label": "HR & Key Person",
+      "items": [
+        {
+          "id": "hr_001",
+          "description": "Key management CVs / biographies",
+          "tier": { "producing_asset": "good_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["CV", "resume", "biography", "management team", "executive team", "key personnel", "leadership team"],
+          "doc_types": ["corporate_presentation"],
+          "age_threshold_years": 2,
+          "notes": "Identify key person dependencies and retention risk.",
+          "drl_request_text": "Please provide CVs or professional biographies for all key operational and management personnel identified in the Information Memorandum, including their tenure with the company and prior relevant experience."
+        },
+        {
+          "id": "hr_002",
+          "description": "Employment contracts (key personnel) and retention arrangements",
+          "tier": { "producing_asset": "good_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["employment contract", "service agreement", "retention agreement", "change of control", "good leaver", "bad leaver", "non-compete", "restrictive covenant", "retention bonus"],
+          "doc_types": ["spa", "joa"],
+          "age_threshold_years": null,
+          "notes": "Review for change-of-control provisions and non-compete clauses.",
+          "drl_request_text": "Please provide employment contracts and retention arrangements for key personnel, redacted for personal information. Please highlight any change-of-control provisions, retention bonuses contingent on the transaction, or restrictive covenant arrangements."
+        }
+      ]
+    },
+
+    "insurance": {
+      "label": "Insurance",
+      "items": [
+        {
+          "id": "ins_001",
+          "description": "Insurance schedule — current policy certificates",
+          "tier": { "producing_asset": "good_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["insurance", "policy schedule", "insurance certificate", "coverage summary", "general liability", "control of well", "operator extra expense", "OEE", "physical damage", "loss of production"],
+          "doc_types": ["other"],
+          "age_threshold_years": 1,
+          "notes": "Review for adequacy of coverage vs industry minimums and asset risk.",
+          "drl_request_text": "Please provide current insurance certificates and policy schedules for all material policies in force, including control of well, operator's extra expense, general liability, and property insurance. Please confirm coverage limits and any exclusions relevant to the assets."
+        },
+        {
+          "id": "ins_002",
+          "description": "Insurance claims history (last 3 years)",
+          "tier": { "producing_asset": "good_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["insurance claim", "claims history", "loss history", "insurance event", "insurance notification"],
+          "doc_types": ["other"],
+          "age_threshold_years": 3,
+          "notes": "Material or recurring claims may indicate operational risk.",
+          "drl_request_text": "Please provide a summary of all insurance claims made in the last three years, including the nature of each claim, the amount claimed, and the outcome."
+        }
+      ]
+    },
+
+    "litigation": {
+      "label": "Litigation & Disputes",
+      "items": [
+        {
+          "id": "lit_001",
+          "description": "Schedule of ongoing and threatened litigation",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["litigation", "dispute", "legal proceedings", "claim", "lawsuit", "arbitration", "court proceedings", "legal notice", "threatened claim"],
+          "doc_types": ["legal_opinion"],
+          "age_threshold_years": null,
+          "notes": "Any material litigation is a red flag. Request 5yr look-back.",
+          "drl_request_text": "Please provide a schedule of all ongoing, threatened, or pending litigation, arbitration, regulatory proceedings, or material disputes to which any entity in scope is a party, or which relate to the assets. Please include the nature of the claim, the amount at issue, and the current status."
+        },
+        {
+          "id": "lit_002",
+          "description": "Regulatory enforcement actions and correspondence",
+          "tier": { "producing_asset": "need_to_have", "exploration": "need_to_have", "development": "need_to_have", "corporate": "need_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["enforcement action", "regulatory notice", "BSEE notice", "NSTA enforcement", "INC", "incident of non-compliance", "civil penalty", "prosecution", "fine", "sanction"],
+          "doc_types": ["regulatory_filing"],
+          "age_threshold_years": 5,
+          "notes": "Any enforcement action or prosecution in last 5 years must be disclosed.",
+          "drl_request_text": "Please provide all regulatory enforcement actions, Incidents of Non-Compliance (INCs), civil penalties, and material correspondence with regulators relating to the assets or any entity in scope in the last five years, together with evidence of corrective actions taken."
+        }
+      ]
+    },
+
+    "hse": {
+      "label": "HSE / Safety",
+      "items": [
+        {
+          "id": "hse_001",
+          "description": "Safety Case / Safety Management System (SMS)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "need_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["UKCS", "Norway"],
+          "jurisdiction_notes": {
+            "UKCS": "OPRED accepted Safety Case required; check revision date vs 5yr threshold",
+            "Norway": "PSA compliant SMS required"
+          },
+          "search_keywords": ["safety case", "safety management system", "SMS", "OPRED", "ALARP", "safety management", "major accident hazard", "MAH"],
+          "doc_types": ["environmental_report", "regulatory_filing"],
+          "age_threshold_years": 5,
+          "notes": "UKCS/Norway only. Safety Case >5yr without update is Partial.",
+          "drl_request_text": "Please provide the current accepted Safety Case (UKCS) or Safety Management System documentation, including the date of last formal review and any open safety-critical element findings."
+        },
+        {
+          "id": "hse_002",
+          "description": "HSE incident history (Tier 1/2 LOPC, LTIs, fatalities)",
+          "tier": { "producing_asset": "need_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["incident report", "LOPC", "loss of primary containment", "LTI", "lost time injury", "fatality", "HSE report", "accident report", "TRIR", "LTIR", "spill", "release"],
+          "doc_types": ["environmental_report"],
+          "age_threshold_years": 5,
+          "notes": "Any Tier 1/2 LOPC, LTI, or fatality in last 5yr is a red flag requiring explanation.",
+          "drl_request_text": "Please provide the HSE incident history for the last five years, including all Tier 1 and Tier 2 Loss of Primary Containment (LOPC) events, Lost Time Injuries (LTIs), fatalities, regulatory notifications, and Root Cause Analysis reports."
+        }
+      ]
+    },
+
+    "data_it": {
+      "label": "Data & IT",
+      "items": [
+        {
+          "id": "data_001",
+          "description": "Seismic data licence agreements",
+          "tier": { "producing_asset": "good_to_have", "exploration": "need_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["seismic licence", "seismic data licence", "data licence", "TGS", "PGS", "CGG", "ION", "data transfer", "licence transfer", "seismic data transfer"],
+          "doc_types": ["other"],
+          "age_threshold_years": null,
+          "notes": "Confirm transferability and any per-seat or per-use fees on transfer.",
+          "drl_request_text": "Please provide all seismic data licence agreements covering data in the VDR, and confirm whether these licences are transferable to a buyer. Please provide any vendor correspondence regarding transfer fees or restrictions."
+        },
+        {
+          "id": "data_002",
+          "description": "Proprietary software licences (reservoir simulators, geomodelling)",
+          "tier": { "producing_asset": "good_to_have", "exploration": "good_to_have", "development": "good_to_have", "corporate": "good_to_have" },
+          "jurisdictions": ["all"],
+          "jurisdiction_notes": {},
+          "search_keywords": ["software licence", "ECLIPSE", "PETREL", "Schlumberger", "SLB", "CMG", "INTERSECT", "Kingdom", "Landmark", "software agreement"],
+          "doc_types": ["other"],
+          "age_threshold_years": null,
+          "notes": "Identify licences that cannot be transferred and require re-licensing at cost.",
+          "drl_request_text": "Please provide a schedule of all software licences used in connection with the assets (including reservoir simulators, geomodelling tools, and production management software) and confirm whether these licences are transferable as part of the transaction."
+        }
+      ]
+    }
+  }
+}
