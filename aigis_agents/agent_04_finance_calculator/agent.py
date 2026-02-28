@@ -18,6 +18,8 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime, timezone
+
+from aigis_agents.mesh.agent_base import AgentBase
 from pathlib import Path
 from typing import Any
 
@@ -456,6 +458,324 @@ def _build_summary(all_metrics: dict[str, CalcResult]) -> FinancialAnalysisSumma
         borrowing_base_usd=_get("RBL Borrowing Base Estimate"),
         eur_mmboe=(_get("EUR") or 0.0) / 1_000_000 if _get("EUR") else None,
     )
+
+
+# ── Agent Mesh class ──────────────────────────────────────────────────────────
+
+class Agent04(AgentBase):
+    """
+    Agent 04 — Upstream Finance Calculator (mesh-enabled).
+
+    Mesh invocation:
+        from aigis_agents.agent_04_finance_calculator.agent import Agent04
+
+        result = Agent04().invoke(
+            mode="standalone",
+            deal_id="...",
+            inputs="./inputs/example.json",
+            output_dir="./outputs",
+            run_sensitivity_analysis=True,
+        )
+
+        # Tool-call from another agent (no file writes):
+        result = Agent04().invoke(
+            mode="tool_call",
+            deal_id="...",
+            inputs=financial_inputs_dict,
+        )
+
+    The legacy finance_calculator_agent() function is unchanged and continues
+    to work for existing CLI usage.
+    """
+
+    AGENT_ID = "agent_04"
+    DK_TAGS  = ["financial", "oil_gas_101"]
+
+    def _run(
+        self,
+        deal_id:    str,
+        main_llm,
+        dk_context: str,
+        patterns:   list,
+        mode:       str = "standalone",
+        output_dir: str = "./outputs",
+        # Agent-specific inputs
+        inputs=None,
+        run_sensitivity_analysis: bool = True,
+        sensitivity_variables=None,
+        **_,
+    ) -> dict:
+        """
+        Core computation pipeline — same logic as finance_calculator_agent() but:
+          - dk_context (from DK Router) replaces the local get_full_context() call
+          - main_llm is available for future narrative synthesis
+          - File I/O is skipped in tool_call mode
+        """
+        output_dir_path = Path(output_dir)
+        run_timestamp = datetime.now(timezone.utc).isoformat()
+
+        # Step 1: Parse inputs
+        try:
+            parsed_inputs = _parse_inputs(inputs)
+        except Exception as e:
+            return {
+                "status": "error",
+                "error_message": f"Input parsing failed: {e}",
+                "deal_id": deal_id,
+                "deal_name": "Unknown",
+            }
+
+        log.info(
+            "Agent04._run: %s | %s | %.0f boepd | $%.0f/bbl",
+            parsed_inputs.deal_name,
+            parsed_inputs.deal_type.value,
+            parsed_inputs.production.initial_rate_boepd,
+            parsed_inputs.price.oil_price_usd_bbl,
+        )
+
+        # Step 2: Build cash flow schedule
+        try:
+            cash_flows = build_cash_flow_schedule(parsed_inputs)
+        except Exception as e:
+            return {
+                "status": "error",
+                "error_message": f"Cash flow build failed: {e}",
+                "deal_id": parsed_inputs.deal_id,
+                "deal_name": parsed_inputs.deal_name,
+            }
+
+        # Step 3: Compute all metrics (identical to existing pipeline)
+        try:
+            all_metrics: dict[str, CalcResult] = {}
+            acq_cost = parsed_inputs.capex.acquisition_cost_usd
+
+            npv_result     = calculate_npv(cash_flows, parsed_inputs.discount_rate_pct)
+            pv10_result    = calculate_pv10(cash_flows)
+            irr_result     = calculate_irr(cash_flows, acq_cost)
+            payback_result = calculate_payback(cash_flows, acq_cost)
+            moic_result    = calculate_moic(cash_flows, acq_cost) if acq_cost > 0 else None
+
+            all_metrics[npv_result.metric_name]     = npv_result
+            all_metrics[pv10_result.metric_name]    = pv10_result
+            all_metrics[irr_result.metric_name]     = irr_result
+            all_metrics[payback_result.metric_name] = payback_result
+            if moic_result:
+                all_metrics[moic_result.metric_name] = moic_result
+
+            if acq_cost > 0 and pv10_result.metric_result is not None:
+                vc = pv10_result.metric_result - acq_cost
+                all_metrics["Value Creation (PV10 − Acquisition Cost)"] = CalcResult(
+                    metric_name="Value Creation (PV10 − Acquisition Cost)",
+                    metric_result=round(vc, 0),
+                    unit="USD",
+                    inputs_used={"asset_pv10_usd": round(pv10_result.metric_result, 0), "acquisition_cost_usd": acq_cost},
+                    formula="Value Creation = Asset PV10 − Acquisition Cost",
+                    workings=[
+                        f"Asset PV10: ${pv10_result.metric_result/1e6:.1f}M",
+                        f"Acquisition cost: ${acq_cost/1e6:.1f}M",
+                        f"Value creation: ${vc/1e6:.1f}M",
+                    ],
+                    caveats=["Positive = paying less than intrinsic PV10 value"],
+                    confidence=Confidence.HIGH,
+                )
+
+            ev_usd = acq_cost
+            if parsed_inputs.reserves:
+                res = parsed_inputs.reserves
+                if res.p2_mmboe:
+                    r = calculate_ev_2p(ev_usd, res.p2_mmboe)
+                    all_metrics[r.metric_name] = r
+                if res.p1_mmboe:
+                    r = calculate_ev_1p(ev_usd, res.p1_mmboe)
+                    all_metrics[r.metric_name] = r
+
+            r = calculate_ev_production(ev_usd, parsed_inputs.production.initial_rate_boepd)
+            all_metrics[r.metric_name] = r
+
+            if cash_flows:
+                r = calculate_ev_ebitda(ev_usd, cash_flows[0].ebitda_usd)
+                all_metrics[r.metric_name] = r
+
+            yr1_boe  = cash_flows[0].production_boe  if cash_flows else 0.0
+            yr1_loe  = cash_flows[0].loe_usd         if cash_flows else 0.0
+            yr1_opex = cash_flows[0].total_opex_usd  if cash_flows else 0.0
+
+            loe_result   = calculate_lifting_cost(yr1_loe, yr1_boe)
+            opex_result  = calculate_opex_per_boe(yr1_opex, yr1_boe)
+            all_metrics[loe_result.metric_name]  = loe_result
+            all_metrics[opex_result.metric_name] = opex_result
+
+            netback_result = calculate_netback(
+                oil_price_usd_bbl=parsed_inputs.price.oil_price_usd_bbl,
+                royalty_rate_pct=parsed_inputs.fiscal.royalty_rate_pct,
+                severance_tax_pct=parsed_inputs.fiscal.severance_tax_pct,
+                loe_per_boe=parsed_inputs.costs.loe_per_boe,
+                transport_per_boe=parsed_inputs.costs.transport_per_boe,
+                differential_usd_bbl=parsed_inputs.price.apply_differential_usd_bbl,
+            )
+            all_metrics[netback_result.metric_name] = netback_result
+
+            breakeven_result = calculate_cash_breakeven(
+                royalty_rate_pct=parsed_inputs.fiscal.royalty_rate_pct,
+                severance_tax_pct=parsed_inputs.fiscal.severance_tax_pct,
+                loe_per_boe=parsed_inputs.costs.loe_per_boe,
+                transport_per_boe=parsed_inputs.costs.transport_per_boe,
+                differential_usd_bbl=parsed_inputs.price.apply_differential_usd_bbl,
+            )
+            all_metrics[breakeven_result.metric_name] = breakeven_result
+
+            if acq_cost > 0:
+                fcbe = calculate_full_cycle_breakeven(cash_flows, acq_cost, parsed_inputs)
+                all_metrics[fcbe.metric_name] = fcbe
+
+            prod = parsed_inputs.production
+            eur_result = calculate_eur(
+                q_i=prod.initial_rate_boepd * (prod.uptime_pct / 100.0),
+                D_nominal=prod.decline_rate_annual_pct / 100.0,
+                b=prod.b_factor,
+                q_econ=prod.economic_limit_bopd,
+                decline_type=prod.decline_type,
+            )
+            all_metrics[eur_result.metric_name] = eur_result
+
+            dev_capex_total = sum(parsed_inputs.capex.development_capex_by_year_usd)
+            if dev_capex_total > 0 and parsed_inputs.reserves and parsed_inputs.reserves.p2_mmboe:
+                fnd = calculate_fnd_cost(dev_capex_total, parsed_inputs.reserves.p2_mmboe)
+                all_metrics[fnd.metric_name] = fnd
+                if netback_result.metric_result is not None and fnd.metric_result is not None:
+                    rr = calculate_recycle_ratio(netback_result.metric_result, fnd.metric_result)
+                    all_metrics[rr.metric_name] = rr
+
+            if cash_flows:
+                total_gross_rev = sum(cf.gross_revenue_usd for cf in cash_flows)
+                total_royalty   = sum(cf.royalty_usd       for cf in cash_flows)
+                total_tax       = sum(cf.income_tax_usd    for cf in cash_flows)
+                r = calculate_royalty_payment(total_gross_rev, parsed_inputs.fiscal.royalty_rate_pct)
+                all_metrics[r.metric_name] = r
+                r = calculate_severance_tax(total_gross_rev, parsed_inputs.fiscal.severance_tax_pct)
+                all_metrics[r.metric_name] = r
+                r = calculate_net_revenue_interest(
+                    parsed_inputs.fiscal.wi_pct,
+                    parsed_inputs.fiscal.royalty_rate_pct,
+                    parsed_inputs.fiscal.orri_pct,
+                )
+                all_metrics[r.metric_name] = r
+                gov_take = calculate_government_take(total_gross_rev, total_royalty, 0.0, total_tax)
+                all_metrics[gov_take.metric_name] = gov_take
+
+            pv10_val = pv10_result.metric_result
+            if pv10_val and pv10_val > 0:
+                r = calculate_borrowing_base(pv10_val)
+                all_metrics[r.metric_name] = r
+
+            if parsed_inputs.rbl and parsed_inputs.rbl.debt_service_annual_usd and cash_flows:
+                r = calculate_dscr(cash_flows[0].net_cash_flow_usd, parsed_inputs.rbl.debt_service_annual_usd)
+                all_metrics[r.metric_name] = r
+
+        except Exception as e:
+            log.error("Metric computation error: %s", e, exc_info=True)
+            return {
+                "status": "partial",
+                "error_message": f"Metric computation partially failed: {e}",
+                "deal_id": parsed_inputs.deal_id,
+                "deal_name": parsed_inputs.deal_name,
+            }
+
+        summary = _build_summary(all_metrics)
+
+        # Step 4: Sensitivity
+        sensitivity_rows = []
+        if run_sensitivity_analysis:
+            try:
+                base_npv = pv10_result.metric_result or 0.0
+                sensitivity_rows = run_sensitivity(
+                    inputs=parsed_inputs,
+                    base_npv_usd=base_npv,
+                    variables=sensitivity_variables,
+                )
+            except Exception as e:
+                log.warning("Sensitivity analysis failed: %s", e)
+
+        # Step 5: Validate + flag
+        flags = validate_metrics(summary, parsed_inputs.jurisdiction, parsed_inputs.deal_type)
+        summary.flag_count_critical = sum(1 for f in flags if "CRITICAL" in f.severity)
+        summary.flag_count_warning  = sum(1 for f in flags if "WARNING"  in f.severity)
+
+        # Step 6: File I/O — standalone mode only
+        output_paths: dict[str, str] = {}
+        if mode == "standalone":
+            try:
+                register_run(parsed_inputs, summary, output_dir_path, cost_usd=0.0)
+            except Exception as e:
+                log.warning("Registry update failed: %s", e)
+
+            try:
+                md_path, _ = generate_financial_report(
+                    inputs=parsed_inputs,
+                    all_metrics=all_metrics,
+                    cash_flows=cash_flows,
+                    sensitivity=sensitivity_rows,
+                    flags=flags,
+                    summary=summary,
+                    output_dir=output_dir_path,
+                )
+                output_paths["financial_analysis_md"] = str(md_path)
+            except Exception as e:
+                log.error("Report generation failed: %s", e, exc_info=True)
+
+            try:
+                agent_result_obj = AgentResult(
+                    status="success",
+                    deal_id=parsed_inputs.deal_id,
+                    deal_name=parsed_inputs.deal_name,
+                    outputs=output_paths,
+                    summary=summary,
+                    all_metrics=all_metrics,
+                    cash_flows=cash_flows,
+                    sensitivity=sensitivity_rows,
+                    flags=flags,
+                    run_timestamp=run_timestamp,
+                    cost_usd=0.0,
+                )
+                json_path = write_json_result(agent_result_obj, output_dir_path, parsed_inputs.deal_id)
+                output_paths["financial_analysis_json"] = str(json_path)
+            except Exception as e:
+                log.warning("JSON result write failed: %s", e)
+
+        # ── Return raw output for mesh envelope ───────────────────────────────
+        def _m(name: str):
+            r = all_metrics.get(name)
+            return r.metric_result if r else None
+
+        return {
+            "deal_id":      parsed_inputs.deal_id,
+            "deal_name":    parsed_inputs.deal_name,
+            "deal_type":    parsed_inputs.deal_type.value,
+            "jurisdiction": parsed_inputs.jurisdiction.value,
+            "run_timestamp": run_timestamp,
+            # Key metrics — exposed to tool_call consumers
+            "npv_10_usd":                   _m("PV10") or _m("NPV @ 10%"),
+            "irr_pct":                      summary.irr_pct,
+            "payback_years":                summary.payback_years,
+            "moic":                         summary.moic,
+            "loe_per_boe":                  summary.loe_per_boe,
+            "netback_usd_bbl":              summary.netback_usd_bbl,
+            "cash_breakeven_usd_bbl":       summary.cash_breakeven_usd_bbl,
+            "full_cycle_breakeven_usd_bbl": summary.full_cycle_breakeven_usd_bbl,
+            "ev_2p_usd_boe":               summary.ev_2p_usd_boe,
+            "ev_production_usd_boepd":     summary.ev_production_usd_boepd,
+            "eur_mmboe":                   summary.eur_mmboe,
+            "government_take_pct":          summary.government_take_pct,
+            "borrowing_base_usd":           summary.borrowing_base_usd,
+            "flag_count_critical":          summary.flag_count_critical,
+            "flag_count_warning":           summary.flag_count_warning,
+            "flags": [
+                {"severity": f.severity, "message": f.message, "metric": f.metric_name}
+                for f in flags
+            ],
+            "sensitivity_variables": len(sensitivity_rows),
+            "output_paths": output_paths,  # populated in standalone; empty in tool_call
+        }
 
 
 def compute_single_metric(

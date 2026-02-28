@@ -1,0 +1,768 @@
+{
+  "version": "1.2",
+  "last_updated": "2026-02-28",
+  "phase": "2-3-complete-agent02-production",
+  "description": "Aigis Agent Mesh — live registry of all agents. Updated on every new agent merge. Used by AgentBase, DomainKnowledgeRouter, MemoryManager, and Agent 06 (Q&A Synthesis) for routing.",
+  "agents": {
+    "agent_01": {
+      "id": "agent_01",
+      "name": "VDR Document Inventory & Gap Analyst",
+      "description": "Enumerates the full VDR folder/file structure, classifies every document against a gold-standard upstream DD checklist (87 items), generates a pointed Data Request List ready to email to seller advisors.",
+      "status": "production",
+      "agent_version": "2.0",
+      "tier": "quick_win",
+      "sprint": 1,
+      "module_path": "aigis_agents.agent_01_vdr_inventory.agent",
+      "invoke_fn": "vdr_inventory_agent",
+      "mesh_class": "aigis_agents.agent_01_vdr_inventory.agent.Agent01",
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":            {"type": "str",  "required": true,  "description": "UUID for the deal"},
+        "deal_type":          {"type": "str",  "required": true,  "enum": ["producing_asset", "exploration", "development", "corporate"]},
+        "jurisdiction":       {"type": "str",  "required": true,  "enum": ["GoM", "UKCS", "Norway", "International"]},
+        "deal_name":          {"type": "str",  "required": false, "description": "Human-readable deal name for report headers"},
+        "buyer_name":         {"type": "str",  "required": false, "description": "Buyer entity name for DRL cover page"},
+        "vdr_path":           {"type": "str",  "required": false, "description": "Local folder path to VDR files"},
+        "vdr_export_csv":     {"type": "str",  "required": false, "description": "Path to VDR platform export CSV/XLSX"},
+        "use_db":             {"type": "bool", "required": false, "default": true, "description": "Query aigis-poc PostgreSQL DB for pre-classified docs"},
+        "checklist_version":  {"type": "str",  "required": false, "default": "v1.0", "description": "Checklist version to score against"},
+        "round_number":       {"type": "int",  "required": false, "default": 1, "description": "DRL round number"},
+        "output_dir":         {"type": "str",  "required": false, "default": "./outputs"},
+        "main_model":         {"type": "str",  "required": false, "default": "gpt-4.1", "description": "LLM for classification and generation"},
+        "main_api_key":       {"type": "str",  "required": false, "description": "API key for main model (falls back to env var)"},
+        "audit_model":        {"type": "str",  "required": false, "default": "gpt-4.1-mini", "description": "LLM for quality auditing"},
+        "audit_api_key":      {"type": "str",  "required": false, "description": "API key for audit model (falls back to env var)"}
+      },
+      "output": {
+        "standalone": {
+          "files": ["01_vdr_inventory.json", "01_gap_analysis_report.md", "01_data_request_list.docx"],
+          "summary_keys": ["total_files", "coverage_score", "present_nth", "missing_nth", "partial_nth", "missing_gth", "novel_count"]
+        },
+        "tool_call": {
+          "schema": {
+            "status": "str",
+            "coverage_score": "float",
+            "present": "list[str]",
+            "missing_nth": "list[str]",
+            "partial_nth": "list[str]",
+            "missing_gth": "list[str]",
+            "novel_count": "int",
+            "citations": "list[dict]"
+          }
+        }
+      },
+      "dependencies": {
+        "agents": [],
+        "domain_knowledge_tags": ["vdr_structure", "checklist", "upstream_dd"],
+        "external_apis": [],
+        "optional_db": "aigis-poc PostgreSQL (pre-classified documents)"
+      },
+      "memory_keys": ["learned_classifications", "checklist_proposals", "novel_doc_types"]
+    },
+
+    "agent_02": {
+      "id": "agent_02",
+      "name": "VDR Financial & Operational Data Store",
+      "description": "Single source of truth for all financial and operational numerical data extracted from a VDR. Ingests Excel (cell-level with formulas), PDF (LLM-assisted table extraction), and CSV files. Stores into a typed SQLite DB (13 tables: production, reserves, financials, costs, fiscal, Excel cells, etc.). Built-in post-ingestion cross-source consistency auditor (merged Agent 03 functionality). Three operation modes: ingest_vdr (full VDR walk), ingest_file (single file), query (NL→SQL or direct SQL). Scenario re-evaluation via xlcalculator or Agent 04 delegation.",
+      "status": "production",
+      "agent_version": "1.0",
+      "tier": "quick_win",
+      "sprint": 2,
+      "module_path": "aigis_agents.agent_02_data_store.agent",
+      "invoke_fn": null,
+      "mesh_class": "aigis_agents.agent_02_data_store.agent.Agent02",
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":               {"type": "str",  "required": true,  "description": "Deal UUID"},
+        "operation":             {"type": "str",  "required": false, "default": "ingest_vdr", "enum": ["ingest_vdr", "ingest_file", "query"]},
+        "vdr_path":              {"type": "str",  "required": false, "description": "Root VDR folder path (ingest_vdr)"},
+        "deal_type":             {"type": "str",  "required": false, "default": "producing_asset", "enum": ["producing_asset", "exploration", "development", "corporate"]},
+        "jurisdiction":          {"type": "str",  "required": false, "default": "GoM", "enum": ["GoM", "UKCS", "Norway", "International"]},
+        "case_name":             {"type": "str",  "required": false, "description": "Default case tag (e.g. management_case)"},
+        "overwrite":             {"type": "bool", "required": false, "default": false},
+        "file_filter":           {"type": "list", "required": false, "description": "Limit to these document categories"},
+        "file_path":             {"type": "str",  "required": false, "description": "File to ingest (ingest_file)"},
+        "file_type":             {"type": "str",  "required": false, "enum": ["excel", "pdf", "csv"]},
+        "source_doc_hint":       {"type": "str",  "required": false, "description": "Document type hint (e.g. CPR, LOS)"},
+        "sheet_names":           {"type": "list", "required": false, "description": "Excel sheet whitelist"},
+        "run_consistency_check": {"type": "bool", "required": false, "default": true},
+        "query_text":            {"type": "str",  "required": false, "description": "Natural language query"},
+        "query_sql":             {"type": "str",  "required": false, "description": "Direct SQL query"},
+        "data_type":             {"type": "str",  "required": false, "enum": ["production", "financials", "reserves", "costs", "fiscal", "cells"]},
+        "period_start":          {"type": "str",  "required": false, "description": "ISO date filter"},
+        "period_end":            {"type": "str",  "required": false, "description": "ISO date filter"},
+        "include_metadata":      {"type": "bool", "required": false, "default": true},
+        "scenario":              {"type": "dict", "required": false, "description": "Assumption overrides for scenario re-evaluation"},
+        "pg_sync":               {"type": "bool", "required": false, "default": false, "description": "Sync to PostgreSQL after ingestion"},
+        "pg_dsn":                {"type": "str",  "required": false, "description": "PostgreSQL DSN (falls back to localhost default)"},
+        "output_dir":            {"type": "str",  "required": false, "default": "./outputs"},
+        "main_model":            {"type": "str",  "required": false, "default": "gpt-4.1"},
+        "main_api_key":          {"type": "str",  "required": false},
+        "audit_model":           {"type": "str",  "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":         {"type": "str",  "required": false}
+      },
+      "output": {
+        "standalone": {
+          "files": [
+            "{deal_id}/02_data_store.db",
+            "{deal_id}/02_ingestion_report.md",
+            "{deal_id}/02_conflict_report.md"
+          ],
+          "summary_keys": ["files_processed", "data_points_added", "conflicts"]
+        },
+        "tool_call": {
+          "schema": {
+            "status":             "str",
+            "operation":          "str",
+            "files_processed":    "int",
+            "data_points_added":  "int",
+            "conflicts":          "dict",
+            "cases_present":      "list[str]",
+            "db_path":            "str",
+            "errors":             "list[str]"
+          }
+        }
+      },
+      "dependencies": {
+        "agents": ["agent_01", "agent_04"],
+        "domain_knowledge_tags": ["financial", "technical", "upstream_dd", "oil_gas_101"],
+        "external_apis": [],
+        "optional_db": "aigis-poc PostgreSQL (cross-deal analytics via pg_sync)"
+      },
+      "memory_keys": ["ingestion_patterns", "classification_heuristics", "conflict_thresholds"],
+      "notes": "Merges planned Agent 02 (Production Data Collator) and Agent 03 (Internal Consistency Auditor). Agent 03 entry removed — all cross-source conflict detection is now built into Agent 02's post-ingestion step."
+    },
+
+    "agent_04": {
+      "id": "agent_04",
+      "name": "Upstream Finance Calculator",
+      "description": "Self-contained financial calculation engine for upstream oil & gas assets. Computes NPV, IRR, payback, lifting cost, netback, breakeven, valuation multiples, sensitivity analysis, and fiscal regime modelling. Full audit trail on every calculation.",
+      "status": "production",
+      "agent_version": "2.0",
+      "tier": "quick_win",
+      "sprint": 1,
+      "module_path": "aigis_agents.agent_04_finance_calculator.agent",
+      "invoke_fn": "finance_calculator_agent",
+      "mesh_class": "aigis_agents.agent_04_finance_calculator.agent.Agent04",
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "inputs":              {"type": "str",  "required": true, "description": "Path to JSON file with FinancialInputs"},
+        "output_dir":          {"type": "str",  "required": false, "default": "./outputs"},
+        "run_sensitivity_analysis": {"type": "bool", "required": false, "default": true},
+        "main_model":          {"type": "str",  "required": false, "default": "gpt-4.1"},
+        "main_api_key":        {"type": "str",  "required": false},
+        "audit_model":         {"type": "str",  "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":       {"type": "str",  "required": false}
+      },
+      "output": {
+        "standalone": {
+          "files": ["04_financial_analysis.md", "04_financial_analysis.json"],
+          "summary_keys": ["npv_10_usd", "irr_pct", "payback_years", "loe_per_boe", "netback_usd_bbl", "cash_breakeven_usd_bbl"]
+        },
+        "tool_call": {
+          "schema": {
+            "status": "str",
+            "npv_10_usd": "float",
+            "irr_pct": "float",
+            "payback_years": "float",
+            "loe_per_boe": "float",
+            "netback_usd_bbl": "float",
+            "cash_breakeven_usd_bbl": "float",
+            "ev_2p_usd_boe": "float",
+            "government_take_pct": "float",
+            "flags": "list[dict]",
+            "sensitivity": "dict"
+          }
+        }
+      },
+      "dependencies": {
+        "agents": [],
+        "domain_knowledge_tags": ["financial", "oil_gas_101"],
+        "external_apis": []
+      },
+      "memory_keys": ["benchmark_ranges", "flag_thresholds"]
+    },
+
+    "agent_05": {
+      "id": "agent_05",
+      "name": "Commodity Price Forward Curve Fetcher",
+      "description": "Fetches latest forward price curves for crude oil, gas, and NGLs from EIA, CME/NYMEX, and World Bank. Compares fetched curves against CPR/IM price deck assumptions. Flags aggressive price decks.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "quick_win",
+      "sprint": 2,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "commodity":    {"type": "str", "required": false, "default": "all", "enum": ["WTI", "Brent", "HenryHub", "all"]},
+        "date_from":    {"type": "str", "required": false, "description": "YYYY-MM-DD"},
+        "date_to":      {"type": "str", "required": false, "description": "YYYY-MM-DD"},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["05_price_curves.json", "05_price_deck_comparison.md"]},
+        "tool_call": {"schema": {"status": "str", "curves": "dict", "vdr_comparison": "list[dict]"}}
+      },
+      "dependencies": {
+        "agents": ["agent_02"],
+        "domain_knowledge_tags": ["financial"],
+        "external_apis": ["EIA REST API (free)", "yfinance/CME (free, 15-min delay)", "World Bank (free)"]
+      },
+      "memory_keys": ["cached_curves"]
+    },
+
+    "agent_06": {
+      "id": "agent_06",
+      "name": "Q&A Synthesis Engine",
+      "description": "Primary analyst-facing conversational interface. Takes any natural language question about the deal, routes it to the appropriate specialist agents, synthesises responses into a cited, structured answer. The front door of the Aigis platform.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "quick_win",
+      "sprint": 1,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "question":     {"type": "str", "required": true, "description": "Natural language question about the deal"},
+        "session_id":   {"type": "str", "required": false, "description": "Session ID for conversation memory"},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["06_qa_response.md"]},
+        "tool_call": {"schema": {"status": "str", "answer": "str", "supporting_detail": "str", "sources": "list[dict]", "confidence": "str"}}
+      },
+      "dependencies": {
+        "agents": ["agent_01", "agent_02", "agent_04", "agent_05"],
+        "domain_knowledge_tags": ["upstream_dd", "golden_questions", "dd_process_full"],
+        "external_apis": []
+      },
+      "memory_keys": ["session_context", "routing_patterns"]
+    },
+
+    "agent_07": {
+      "id": "agent_07",
+      "name": "Well Performance Intelligence Cards",
+      "description": "Generates a one-page Well Intelligence Card per well summarising all key performance metrics, trends, and a status flag (Outperformer / On-track / Underperformer / Shut-in). Fleet-level summary included.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "quick_win",
+      "sprint": 3,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "wells":        {"type": "str", "required": false, "default": "all", "description": "Comma-separated well names or 'all'"},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["07_well_cards.pdf", "07_well_portfolio_summary.xlsx"]},
+        "tool_call": {"schema": {"status": "str", "well_cards": "list[dict]", "portfolio_summary": "dict"}}
+      },
+      "dependencies": {
+        "agents": ["agent_02", "agent_04"],
+        "domain_knowledge_tags": ["technical", "upstream_dd"],
+        "external_apis": []
+      },
+      "memory_keys": []
+    },
+
+    "agent_08": {
+      "id": "agent_08",
+      "name": "HSE Red Flag Scanner",
+      "description": "Scans all HSE/HSSE documents in the VDR for material safety events, regulatory citations, and compliance gaps. Auto-flags Tier 1/2 LOPCs, regulatory enforcement, fatalities, open corrective actions, and outdated Safety Cases.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "quick_win",
+      "sprint": 1,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["08_hse_risk_summary.md"]},
+        "tool_call": {"schema": {"status": "str", "critical_count": "int", "findings": "list[dict]", "iogp_severity": "str"}}
+      },
+      "dependencies": {
+        "agents": ["agent_01"],
+        "domain_knowledge_tags": ["esg", "upstream_dd"],
+        "external_apis": []
+      },
+      "memory_keys": ["hse_red_flag_patterns"]
+    },
+
+    "agent_09": {
+      "id": "agent_09",
+      "name": "JOA / Licence / Contract Key Terms Extractor",
+      "description": "Extracts all critical contractual terms from JOAs, PSCs, licence agreements, and commercial contracts. Produces a structured Contract Summary Pack. Auto-flags high-risk clauses (CoC consent, ROFR/ROFO, take-or-pay).",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "medium_lift",
+      "sprint": 3,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":        {"type": "str", "required": true},
+        "contract_type":  {"type": "str", "required": false, "default": "all", "enum": ["JOA", "PSC", "licence", "offtake", "all"]},
+        "output_dir":     {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":     {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key":   {"type": "str", "required": false},
+        "audit_model":    {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":  {"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["09_contract_summary_pack.docx", "09_red_flag_register.md"]},
+        "tool_call": {"schema": {"status": "str", "red_flags": "list[dict]", "key_terms": "dict"}}
+      },
+      "dependencies": {
+        "agents": ["agent_01"],
+        "domain_knowledge_tags": ["legal", "upstream_dd"],
+        "external_apis": []
+      },
+      "memory_keys": ["clause_patterns"]
+    },
+
+    "agent_10": {
+      "id": "agent_10",
+      "name": "ARO / Decommissioning Cost Aggregator",
+      "description": "Extracts all ARO/decom estimates from all VDR sources. Normalises to P50/P70/P90. Benchmarks against industry data (GoM, UKCS). Flags seller ARO as understated where evidence supports.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "medium_lift",
+      "sprint": 3,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "jurisdiction": {"type": "str", "required": false, "enum": ["GoM", "UKCS", "Norway", "International"]},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["10_aro_summary.md", "10_aro_waterfall.xlsx"]},
+        "tool_call": {"schema": {"status": "str", "p50_total_usd": "float", "p70_total_usd": "float", "p90_total_usd": "float", "flags": "list[dict]"}}
+      },
+      "dependencies": {
+        "agents": ["agent_01", "agent_04"],
+        "domain_knowledge_tags": ["technical", "financial", "upstream_dd"],
+        "external_apis": ["BOEM public API (GoM wells, free)"]
+      },
+      "memory_keys": ["aro_benchmark_ranges"]
+    },
+
+    "agent_11": {
+      "id": "agent_11",
+      "name": "Regulatory Licence Status Checker",
+      "description": "Extracts all regulatory obligations from VDR. Cross-references public regulator databases (BSEE TIMS, NSTA OGA, NPD Factpages). Flags upcoming expiries, outstanding obligations, open enforcement actions.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "medium_lift",
+      "sprint": 3,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "jurisdiction": {"type": "str", "required": true, "enum": ["GoM", "UKCS", "Norway", "International"]},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["11_regulatory_status.md", "11_consent_to_assign_tracker.xlsx"]},
+        "tool_call": {"schema": {"status": "str", "expiry_flags": "list[dict]", "coa_required": "list[str]"}}
+      },
+      "dependencies": {
+        "agents": ["agent_09"],
+        "domain_knowledge_tags": ["legal", "upstream_dd"],
+        "external_apis": ["BSEE TIMS API (free)", "NPD Factpages API (free)", "NSTA OGA portal (free)"]
+      },
+      "memory_keys": []
+    },
+
+    "agent_12": {
+      "id": "agent_12",
+      "name": "Debt, Hedging & Liability Schedule Builder",
+      "description": "Extracts all financial liabilities from VDR. Builds Day-1 liability waterfall: gross debt + hedge MTM + contingent liabilities. Flags covenant risks and change-of-control debt triggers.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "medium_lift",
+      "sprint": 4,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["12_day1_liability_waterfall.xlsx", "12_debt_covenant_tracker.md"]},
+        "tool_call": {"schema": {"status": "str", "total_debt_usd": "float", "hedge_mtm_usd": "float", "day1_liability_usd": "float", "flags": "list[dict]"}}
+      },
+      "dependencies": {
+        "agents": ["agent_04", "agent_05"],
+        "domain_knowledge_tags": ["financial", "legal"],
+        "external_apis": []
+      },
+      "memory_keys": []
+    },
+
+    "agent_13": {
+      "id": "agent_13",
+      "name": "Comparable Transactions Finder",
+      "description": "Searches public sources for comparable upstream M&A transactions. Extracts EV, EV/2P, EV/boepd metrics. Provides instant bid calibration context. Primary: SEC EDGAR 8-K filings + web search.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "medium_lift",
+      "sprint": 3,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "geography":    {"type": "str", "required": false, "description": "e.g. 'GoM', 'UKCS'"},
+        "asset_type":   {"type": "str", "required": false, "description": "e.g. 'producing', 'exploration'"},
+        "date_from":    {"type": "str", "required": false, "description": "YYYY-MM-DD"},
+        "date_to":      {"type": "str", "required": false, "description": "YYYY-MM-DD"},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["13_comps_table.xlsx", "13_comps_narrative.md"]},
+        "tool_call": {"schema": {"status": "str", "comps": "list[dict]", "median_ev_2p": "float", "median_ev_boepd": "float"}}
+      },
+      "dependencies": {
+        "agents": [],
+        "domain_knowledge_tags": ["financial", "upstream_dd"],
+        "external_apis": ["SEC EDGAR (free)", "web search"]
+      },
+      "memory_keys": ["comp_transaction_cache"]
+    },
+
+    "agent_14": {
+      "id": "agent_14",
+      "name": "Opex & Capex Benchmarking Agent",
+      "description": "Extracts all cost assumptions from VDR. Compares against basin-specific industry benchmarks. Flags understated or overstated cost assumptions relative to BSEE, NSTA, and IEA published data.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "medium_lift",
+      "sprint": 4,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["14_cost_benchmarking.md"]},
+        "tool_call": {"schema": {"status": "str", "opex_flag": "str", "capex_flag": "str", "findings": "list[dict]"}}
+      },
+      "dependencies": {
+        "agents": ["agent_02", "agent_04"],
+        "domain_knowledge_tags": ["financial", "technical"],
+        "external_apis": ["BSEE (free)", "NSTA Industry Stewardship Reports (free)", "IEA WEO (free)"]
+      },
+      "memory_keys": ["benchmark_data"]
+    },
+
+    "agent_15": {
+      "id": "agent_15",
+      "name": "Seller Model Reverse-Engineer & Sensitivity Analyser",
+      "description": "Re-runs the seller's financial model using independently validated inputs from Agent 03. Runs full sensitivity on key upstream variables. Flags where seller model relies on optimistic assumptions.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "medium_lift",
+      "sprint": 3,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["15_sensitivity_analysis.xlsx", "15_base_case_validation.md"]},
+        "tool_call": {"schema": {"status": "str", "buyer_npv_usd": "float", "seller_npv_usd": "float", "variance_pct": "float", "key_differences": "list[dict]"}}
+      },
+      "dependencies": {
+        "agents": ["agent_02", "agent_04", "agent_05"],
+        "domain_knowledge_tags": ["financial", "upstream_dd"],
+        "external_apis": []
+      },
+      "memory_keys": []
+    },
+
+    "agent_16": {
+      "id": "agent_16",
+      "name": "Title & Ownership Chain Validator",
+      "description": "Traces the full chain of title for each licence. Three-way matches WI% across JOA, CPR, and IM. Flags any gap in chain or WI discrepancy. Identifies outstanding ROFR/ROFO with no waiver evidence.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "medium_lift",
+      "sprint": 4,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["16_title_chain.md", "16_wi_reconciliation.xlsx"]},
+        "tool_call": {"schema": {"status": "str", "title_gaps": "list[dict]", "wi_discrepancies": "list[dict]"}}
+      },
+      "dependencies": {
+        "agents": ["agent_09"],
+        "domain_knowledge_tags": ["legal", "upstream_dd"],
+        "external_apis": []
+      },
+      "memory_keys": []
+    },
+
+    "agent_17": {
+      "id": "agent_17",
+      "name": "CPR Decline Modeller & Forecast Validator",
+      "description": "Independently fits decline curve models (exponential, hyperbolic, harmonic) to historical production data per well. Compares against CPR forecasts. Provides buyer's own P10/P50/P90 production profiles.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "strategic_build",
+      "sprint": null,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["17_decline_models.xlsx", "17_cpr_comparison.md"]},
+        "tool_call": {"schema": {"status": "str", "p50_eur_mmboe": "float", "cpr_variance_pct": "float", "well_profiles": "list[dict]"}}
+      },
+      "dependencies": {
+        "agents": ["agent_02"],
+        "domain_knowledge_tags": ["technical", "upstream_dd"],
+        "external_apis": []
+      },
+      "memory_keys": []
+    },
+
+    "agent_18": {
+      "id": "agent_18",
+      "name": "ESG & Carbon Liability Scanner",
+      "description": "Scans VDR for GHG emissions, flaring, methane intensity, TCFD disclosures. Benchmarks against sector standards. Computes NPV impact of carbon costs at multiple price scenarios.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "strategic_build",
+      "sprint": null,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["18_esg_report.md"]},
+        "tool_call": {"schema": {"status": "str", "carbon_liability_usd": "dict", "esg_flags": "list[dict]"}}
+      },
+      "dependencies": {
+        "agents": ["agent_01"],
+        "domain_knowledge_tags": ["esg", "financial"],
+        "external_apis": ["EPA GHG Reporting (free)", "BOEM/BSEE emissions (free)", "ICE ETS prices (free)"]
+      },
+      "memory_keys": []
+    },
+
+    "agent_19": {
+      "id": "agent_19",
+      "name": "Technical Risk Scoring Engine",
+      "description": "Produces a single auditable Technical Risk Score (0–100) aggregating findings from ALL agents. Weighted risk matrix across 7 dimensions. Generates one-page IC traffic-light scorecard PDF.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "strategic_build",
+      "sprint": 4,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["19_risk_scorecard.pdf", "19_risk_scorecard.json"]},
+        "tool_call": {"schema": {"status": "str", "overall_score": "int", "dimension_scores": "dict", "traffic_light": "str"}}
+      },
+      "dependencies": {
+        "agents": ["agent_01", "agent_02", "agent_04", "agent_05", "agent_08", "agent_09", "agent_10", "agent_11", "agent_12", "agent_16"],
+        "domain_knowledge_tags": ["dd_process_full"],
+        "external_apis": []
+      },
+      "memory_keys": ["risk_weight_config"]
+    },
+
+    "agent_20": {
+      "id": "agent_20",
+      "name": "Post-Acquisition Integration Checklist Generator",
+      "description": "Uses findings from all DD agents to auto-generate a 100-day integration plan. Day-1 critical actions, Day-1–30 administrative, Day-31–100 operational optimisation.",
+      "status": "planned",
+      "agent_version": null,
+      "tier": "strategic_build",
+      "sprint": 4,
+      "module_path": null,
+      "invoke_fn": null,
+      "mesh_class": null,
+      "llm_defaults": {
+        "main_model": "gpt-4.1",
+        "audit_model": "gpt-4.1-mini"
+      },
+      "input_params": {
+        "deal_id":      {"type": "str", "required": true},
+        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
+        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
+        "main_api_key": {"type": "str", "required": false},
+        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":{"type": "str", "required": false}
+      },
+      "output": {
+        "standalone": {"files": ["20_100day_integration_plan.md", "20_100day_integration_plan.xlsx"]},
+        "tool_call": {"schema": {"status": "str", "day1_actions": "list[str]", "day30_actions": "list[str]", "day100_actions": "list[str]"}}
+      },
+      "dependencies": {
+        "agents": ["agent_01", "agent_09", "agent_11", "agent_12", "agent_16"],
+        "domain_knowledge_tags": ["dd_process_full", "upstream_dd"],
+        "external_apis": []
+      },
+      "memory_keys": []
+    }
+  }
+}

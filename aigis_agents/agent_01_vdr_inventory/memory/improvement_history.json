@@ -1,0 +1,14 @@
+{
+  "auto_apply_enabled": false,
+  "auto_apply_threshold": null,
+  "approval_stats": {
+    "total_suggestions": 0,
+    "approved_as_suggested": 0,
+    "approved_with_modifications": 0,
+    "rejected": 0,
+    "auto_applied": 0,
+    "pending": 0,
+    "approval_rate": 0.0
+  },
+  "suggestions": []
+}
