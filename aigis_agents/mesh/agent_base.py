@@ -6,18 +6,23 @@ Every agent in the mesh inherits from AgentBase and only needs to:
   2. Set DK_TAGS = [...] (class-level)
   3. Implement _run(deal_id, main_llm, dk_context, patterns, **inputs) -> dict
 
-AgentBase.invoke() handles the full 10-step pipeline:
-  1.  Resolve models (from params → toolkit defaults)
-  2.  Resolve API keys (from params → env vars)
-  3.  Instantiate main LLM + audit LLM
-  4.  Input audit (abort if any ERROR-severity issue)
-  5.  Load domain knowledge (session-cached)
-  6.  Load memory patterns
-  7.  Run core logic (_run)
-  8.  Output audit
-  9.  Queue improvement suggestions for human review
-  10. Log to deal audit trail
-  11. Format and return (mode-dependent)
+AgentBase.invoke() handles the full pipeline:
+  1.   Resolve models (from params → toolkit defaults)
+  2.   Resolve API keys (from params → env vars)
+  3.   Instantiate main LLM + audit LLM
+  4.   Input audit (abort if any ERROR-severity issue)
+  5.   Load domain knowledge (SemanticDKRouter: tag phase always + semantic phase if configured)
+  5.5  Load buyer profile context
+  5.6  Load deal context (per-deal accumulating markdown)
+  6.   Load memory patterns
+  7.   Run core logic (_run)
+  7.5  Extract _deal_context_section internal key (before audit)
+  8.   Output audit
+  9.   Queue improvement suggestions for human review
+  9.5  Detect buyer preference signals; prompt "Remember this?" in standalone mode
+  10.  Log to deal audit trail
+  10.5 Update deal context (if agent returned _deal_context_section)
+  11.  Format and return (mode-dependent)
 
 Cross-agent calls:
     result = self.call_agent("agent_01", deal_id="...", **inputs)
@@ -33,16 +38,19 @@ import time
 from typing import Any
 
 from aigis_agents.mesh.audit_layer import AuditLayer
-from aigis_agents.mesh.domain_knowledge import DomainKnowledgeRouter
+from aigis_agents.mesh.buyer_profile_manager import BuyerProfileManager
+from aigis_agents.mesh.deal_context import DealContextManager, DealContextSection
 from aigis_agents.mesh.memory_manager import MemoryManager
+from aigis_agents.mesh.semantic_dk_router import SemanticDKRouter
 from aigis_agents.mesh.toolkit_registry import ToolkitRegistry
 from aigis_agents.shared.llm_bridge import get_chat_model
 
 logger = logging.getLogger(__name__)
 
-# Single session-scoped DK router shared by all agents (class-level singleton)
-_dk_router = DomainKnowledgeRouter()
-_memory    = MemoryManager()
+# Single session-scoped singletons shared by all agents
+_dk_router     = SemanticDKRouter()   # wraps DomainKnowledgeRouter; falls back to tag-only
+_memory        = MemoryManager()
+_buyer_profile = BuyerProfileManager()
 
 
 class AgentBase:
@@ -58,8 +66,9 @@ class AgentBase:
             raise ValueError(
                 f"{self.__class__.__name__} must define AGENT_ID as a non-empty class attribute."
             )
-        self._dk_router = _dk_router
-        self._memory    = _memory
+        self._dk_router     = _dk_router
+        self._memory        = _memory
+        self._buyer_profile = _buyer_profile
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -104,7 +113,28 @@ class AgentBase:
             )
 
         # ── 5: Load domain knowledge ──────────────────────────────────────────
-        dk_context = self._dk_router.build_context_block(self.DK_TAGS, refresh=refresh_dk)
+        # query derived from tags: used by SemanticDKRouter for Phase 2 search
+        _dk_query = " ".join(self.DK_TAGS) if self.DK_TAGS else None
+        dk_context = self._dk_router.build_context_block(
+            self.DK_TAGS, refresh=refresh_dk, query=_dk_query
+        )
+
+        # ── 5.5: Load buyer profile context ───────────────────────────────────
+        buyer_context = self._buyer_profile.load_as_context()
+
+        # ── 5.6: Load deal context (per-deal accumulating markdown) ───────────
+        deal_context_mgr = DealContextManager(deal_id=deal_id)
+        deal_context = deal_context_mgr.load()
+
+        # ── 5.7: Load entity context from concept graph ────────────────────────
+        entity_context = ""
+        try:
+            from pathlib import Path as _Path
+            from aigis_agents.mesh.concept_graph import ConceptGraph
+            _cg_path = _Path(output_dir) / deal_id / "02_data_store.db"
+            entity_context = ConceptGraph(_cg_path).get_deal_context_summary(deal_id)
+        except Exception as _exc:
+            logger.debug("Step 5.7 entity context load failed (non-blocking): %s", _exc)
 
         # ── 6: Load memory patterns ───────────────────────────────────────────
         patterns = self._memory.load_patterns(self.AGENT_ID)
@@ -115,6 +145,9 @@ class AgentBase:
                 deal_id=deal_id,
                 main_llm=main_llm,
                 dk_context=dk_context,
+                buyer_context=buyer_context,
+                deal_context=deal_context,
+                entity_context=entity_context,
                 patterns=patterns,
                 mode=mode,
                 output_dir=output_dir,
@@ -127,6 +160,9 @@ class AgentBase:
                 str(exc),
                 {},
             )
+
+        # ── 7.5: Extract internal metadata before audit ───────────────────────
+        _dc_section = raw_output.pop("_deal_context_section", None)
 
         # ── 8: Output audit ───────────────────────────────────────────────────
         output_audit = audit_layer.check_outputs(self.AGENT_ID, inputs, raw_output)
@@ -143,6 +179,30 @@ class AgentBase:
                 logger.debug("Queued improvement suggestion %s for review.", sid)
             except Exception as exc:
                 logger.warning("Failed to queue suggestion: %s", exc)
+
+        # ── 9.5: Detect buyer preference signals; prompt to remember ─────────────
+        if mode == "standalone":
+            try:
+                signals = audit_layer.detect_preferences(inputs, raw_output)
+                for signal in signals:
+                    if signal.confidence >= 0.75:
+                        try:
+                            confirm = input(
+                                f"\n[Buyer Profile] Detected preference: "
+                                f"'{signal.value}' for '{signal.key}'.\n"
+                                f"Remember this for future runs? [y/N]: "
+                            )
+                            if confirm.strip().lower() == "y":
+                                self._buyer_profile.apply_signal(signal)
+                                logger.info(
+                                    "Buyer preference saved: %s = %s",
+                                    signal.key, signal.value,
+                                )
+                        except (EOFError, OSError):
+                            # Non-interactive context (CI, piped stdin) — skip prompt
+                            pass
+            except Exception as exc:
+                logger.debug("Step 9.5 preference detection failed (non-blocking): %s", exc)
 
         # ── 10: Log to audit trail ─────────────────────────────────────────────
         duration_s = round(time.monotonic() - start_ts, 2)
@@ -170,6 +230,32 @@ class AgentBase:
             "main_model":   _main_model,
             "audit_model":  _audit_model,
         })
+
+        # ── 10.5: Update deal context ──────────────────────────────────────────
+        if _dc_section and isinstance(_dc_section, dict):
+            try:
+                section = DealContextSection(
+                    agent_id=self.AGENT_ID,
+                    section_name=_dc_section.get("section_name", self.AGENT_ID),
+                    content=_dc_section.get("content", ""),
+                    updated_at=_now(),
+                    run_id=run_id,
+                )
+                deal_context_mgr.update_section(section)
+                flags_list = [
+                    f.get("message", str(f))
+                    for f in raw_output.get("flags", [])
+                    if isinstance(f, dict)
+                ]
+                deal_context_mgr.append_run_log(
+                    agent_id=self.AGENT_ID,
+                    run_id=run_id,
+                    flags=flags_list[:3],
+                    summary=_dc_section.get("content", "")[:120],
+                )
+                logger.debug("Deal context updated by %s (run %s).", self.AGENT_ID, run_id)
+            except Exception as exc:
+                logger.debug("Step 10.5 deal context update failed (non-blocking): %s", exc)
 
         # ── 11: Format and return ─────────────────────────────────────────────
         return self._format_output(
@@ -217,29 +303,37 @@ class AgentBase:
 
     def _run(
         self,
-        deal_id:    str,
-        main_llm:   Any,
-        dk_context: str,
-        patterns:   list[dict],
-        mode:       str = "standalone",
-        output_dir: str = "./outputs",
+        deal_id:        str,
+        main_llm:       Any,
+        dk_context:     str,
+        buyer_context:  str,
+        deal_context:   str,
+        entity_context: str,
+        patterns:       list[dict],
+        mode:           str = "standalone",
+        output_dir:     str = "./outputs",
         **inputs: Any,
     ) -> dict:
         """Core agent logic.  Must be overridden by each agent subclass.
 
         Args:
-            deal_id:    The deal UUID.
-            main_llm:   Instantiated LangChain chat model for core reasoning.
-            dk_context: Formatted domain knowledge block for prompt injection.
-            patterns:   List of confirmed learned patterns from memory.
-            mode:       "standalone" (write files) or "tool_call" (no file I/O).
-            output_dir: Root output directory (relevant in standalone mode).
-            **inputs:   All caller-supplied inputs (validated by audit layer).
+            deal_id:        The deal UUID.
+            main_llm:       Instantiated LangChain chat model for core reasoning.
+            dk_context:     Formatted domain knowledge block for prompt injection.
+            buyer_context:  Buyer profile markdown for prompt injection.
+            deal_context:   Per-deal accumulating context markdown for prompt injection.
+            entity_context: Concept graph summary (entities + facts) for prompt injection.
+            patterns:       List of confirmed learned patterns from memory.
+            mode:           "standalone" (write files) or "tool_call" (no file I/O).
+            output_dir:     Root output directory (relevant in standalone mode).
+            **inputs:       All caller-supplied inputs (validated by audit layer).
 
         Returns:
-            A dict of raw outputs.  May optionally include a "_cost" key with
-            {"main_llm_usd": float, "audit_llm_usd": float, "total_usd": float}
-            which AgentBase will pop and include in the audit log.
+            A dict of raw outputs.  May optionally include:
+              "_cost": {"main_llm_usd": float, "audit_llm_usd": float, "total_usd": float}
+                  — popped by AgentBase and included in the audit log.
+              "_deal_context_section": {"section_name": str, "content": str}
+                  — popped by AgentBase and used to update deal_context.md (step 10.5).
         """
         raise NotImplementedError(
             f"{self.__class__.__name__} must implement _run()."

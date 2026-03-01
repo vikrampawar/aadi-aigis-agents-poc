@@ -775,6 +775,16 @@ class Agent04(AgentBase):
             ],
             "sensitivity_variables": len(sensitivity_rows),
             "output_paths": output_paths,  # populated in standalone; empty in tool_call
+            "_deal_context_section": {
+                "section_name": "Agent 04 — Financial Analysis Summary",
+                "content": (
+                    f"NPV10: {f'${summary.npv_10_usd / 1e6:,.1f}mm' if summary.npv_10_usd else 'n/a'} | "
+                    f"IRR: {f'{summary.irr_pct:.1f}%' if summary.irr_pct else 'n/a'} | "
+                    f"MOIC: {f'{summary.moic:.2f}x' if summary.moic else 'n/a'} | "
+                    f"Critical flags: {summary.flag_count_critical} | "
+                    f"Warning flags: {summary.flag_count_warning}"
+                ),
+            },
         }
 
 

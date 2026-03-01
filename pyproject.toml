@@ -21,6 +21,17 @@ dependencies = [
 
 [project.scripts]
 aigis-accept-proposals = "aigis_agents.agent_01_vdr_inventory.accept_proposals:main"
+aigis-init-buyer-profile = "aigis_agents.__main__:_cmd_init_buyer_profile"
+aigis-show-buyer-profile = "aigis_agents.__main__:_cmd_show_buyer_profile"
+aigis-index-dk = "aigis_agents.__main__:_cmd_index_dk"
+aigis-show-deal-context = "aigis_agents.__main__:_cmd_show_deal_context"
+
+[project.optional-dependencies]
+semantic = [
+    "sqlite-vec>=0.1",
+    "voyageai>=0.2",
+    "sentence-transformers>=3.0",
+]
 
 [build-system]
 requires = ["hatchling"]

@@ -115,6 +115,34 @@ def _save_json(path: Path, data: dict) -> None:
         raise
 
 
+# ── Temporal pattern weighting ──────────────────────────────────────────────────
+
+_STALE_DAYS  = 365
+_HIGH_DAYS   = 90
+_HIGH_MIN_CONFIRMS = 2
+
+
+def _pattern_weight(pattern: dict) -> str:
+    """Classify a pattern as HIGH / MEDIUM / STALE based on recency.
+
+    Gracefully handles missing date/confirmation fields — defaults to MEDIUM.
+    """
+    try:
+        last_confirmed_str = pattern.get("last_confirmed_date") or pattern.get("added_date")
+        if not last_confirmed_str:
+            return "MEDIUM"
+        last_confirmed = datetime.fromisoformat(last_confirmed_str.replace("Z", "+00:00"))
+        days = (datetime.now(timezone.utc) - last_confirmed).days
+        confirmations = pattern.get("confirmation_count", 1)
+        if days >= _STALE_DAYS:
+            return "STALE"
+        if days < _HIGH_DAYS and confirmations >= _HIGH_MIN_CONFIRMS:
+            return "HIGH"
+        return "MEDIUM"
+    except (ValueError, TypeError):
+        return "MEDIUM"
+
+
 # ── MemoryManager ──────────────────────────────────────────────────────────────
 
 class MemoryManager:
@@ -122,10 +150,34 @@ class MemoryManager:
 
     # ── Pattern management ────────────────────────────────────────────────────
 
-    def load_patterns(self, agent_id: str) -> list[dict]:
-        """Return the list of confirmed learned patterns for *agent_id*."""
+    def load_patterns(
+        self,
+        agent_id: str,
+        include_stale: bool = False,
+    ) -> list[dict]:
+        """Return confirmed learned patterns for *agent_id*, sorted by recency.
+
+        Patterns are tagged with a temporal weight:
+          HIGH   — confirmed < 90 days ago AND confirmation_count >= 2
+          MEDIUM — confirmed < 365 days ago (or missing date fields)
+          STALE  — confirmed >= 365 days ago
+
+        STALE patterns are excluded by default (include_stale=False).
+        Within the returned list, HIGH patterns appear before MEDIUM ones.
+        """
         path = _agent_memory_dir(agent_id) / "learned_patterns.json"
-        return _load_json(path, _empty_patterns).get("patterns", [])
+        patterns = _load_json(path, _empty_patterns).get("patterns", [])
+
+        _order = {"HIGH": 0, "MEDIUM": 1, "STALE": 2}
+        weighted: list[tuple[dict, int]] = []
+        for p in patterns:
+            w = _pattern_weight(p)
+            if w == "STALE" and not include_stale:
+                continue
+            weighted.append((p, _order[w]))
+
+        weighted.sort(key=lambda x: x[1])
+        return [p for p, _ in weighted]
 
     def save_pattern(self, agent_id: str, pattern: dict) -> None:
         """Append *pattern* to the agent's confirmed patterns list."""

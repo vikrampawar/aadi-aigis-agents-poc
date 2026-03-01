@@ -272,6 +272,41 @@ CREATE TABLE IF NOT EXISTS ingestion_log (
     status              TEXT DEFAULT 'complete',
     errors              TEXT
 );
+
+-- ── Concept graph tables (Phase D) ──────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS concept_nodes (
+    node_id     TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    node_type   TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    deal_id     TEXT,
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS concept_edges (
+    edge_id      TEXT PRIMARY KEY,
+    source_id    TEXT NOT NULL,
+    target_id    TEXT NOT NULL,
+    relationship TEXT NOT NULL,
+    weight       REAL DEFAULT 1.0,
+    source_doc   TEXT DEFAULT '',
+    deal_id      TEXT,
+    created_at   TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS propositions (
+    prop_id     TEXT PRIMARY KEY,
+    subject     TEXT NOT NULL,
+    predicate   TEXT NOT NULL,
+    object      TEXT NOT NULL,
+    source_doc  TEXT NOT NULL,
+    deal_id     TEXT NOT NULL,
+    page_ref    TEXT DEFAULT '',
+    confidence  TEXT DEFAULT 'HIGH',
+    created_at  TEXT NOT NULL
+);
 """
 
 # ── Indexes ───────────────────────────────────────────────────────────────────
@@ -288,6 +323,11 @@ CREATE INDEX IF NOT EXISTS idx_conflicts_deal    ON data_conflicts(deal_id, seve
 CREATE INDEX IF NOT EXISTS idx_reserves_deal     ON reserve_estimates(deal_id, reserve_class);
 CREATE INDEX IF NOT EXISTS idx_cost_deal         ON cost_benchmarks(deal_id, metric);
 CREATE INDEX IF NOT EXISTS idx_fiscal_deal       ON fiscal_terms(deal_id, term_name);
+CREATE INDEX IF NOT EXISTS idx_cn_name_deal      ON concept_nodes(name, deal_id);
+CREATE INDEX IF NOT EXISTS idx_ce_source         ON concept_edges(source_id);
+CREATE INDEX IF NOT EXISTS idx_ce_target         ON concept_edges(target_id);
+CREATE INDEX IF NOT EXISTS idx_prop_subj         ON propositions(subject, predicate, deal_id);
+CREATE INDEX IF NOT EXISTS idx_prop_deal         ON propositions(deal_id);
 """
 
 

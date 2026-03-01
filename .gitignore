@@ -16,3 +16,11 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Runtime memory artifacts — test deals and agent memory written during test runs
+aigis_agents/memory/test-deal-*/
+aigis_agents/memory/deal_001/
+aigis_agents/memory/*.db
+aigis_agents/agent_01/
+aigis_agents/agent_02/
+aigis_agents/unknown/

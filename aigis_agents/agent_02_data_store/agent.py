@@ -13,10 +13,13 @@ Three operation modes:
 
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 from aigis_agents.mesh.agent_base import AgentBase
 from aigis_agents.agent_02_data_store import db_manager as db
@@ -212,6 +215,16 @@ class Agent02(AgentBase):
             finally:
                 sync_conn.close()
 
+        stats["_deal_context_section"] = {
+            "section_name": "Agent 02 — Data Store Summary",
+            "content": (
+                f"Files processed: {stats.get('files_processed', 0)} | "
+                f"Data points added: {stats.get('data_points_added', 0)} | "
+                f"Conflicts detected: {conflict_stats.get('total', 0)} "
+                f"({conflict_stats.get('critical', 0)} critical, "
+                f"{conflict_stats.get('warning', 0)} warning)"
+            ),
+        }
         return stats
 
     # ── ingest_file ────────────────────────────────────────────────────────────
@@ -243,6 +256,26 @@ class Agent02(AgentBase):
             )
             result["conflicts"] = conflict_stats
 
+        # ── Entity extraction (non-blocking) ─────────────────────────────────
+        if result.get("doc_id") and file_path:
+            try:
+                from aigis_agents.mesh.entity_extractor import EntityExtractor
+                from aigis_agents.mesh.concept_graph import ConceptGraph
+
+                graph = ConceptGraph(db_path=db.db_path_for_deal(deal_id, output_dir))
+                text_summary = _build_extraction_text(file_path, source_doc_hint, case_name, result)
+                n_extracted = EntityExtractor().extract_and_store(
+                    text=text_summary,
+                    llm=main_llm,
+                    graph=graph,
+                    source_doc=Path(file_path).name,
+                    deal_id=deal_id,
+                )
+                if n_extracted:
+                    result["entities_extracted"] = n_extracted
+            except Exception as _exc:
+                logger.debug("Entity extraction skipped (non-blocking): %s", _exc)
+
         db.log_ingestion(conn, {
             "id":                 str(uuid.uuid4()),
             "deal_id":            deal_id,
@@ -261,6 +294,16 @@ class Agent02(AgentBase):
                 "db": str(db.ensure_db(deal_id, output_dir)),
             }
 
+        conflicts = result.get("conflicts", {})
+        result["_deal_context_section"] = {
+            "section_name": "Agent 02 — Data Store Summary",
+            "content": (
+                f"File: {Path(file_path).name} | "
+                f"Data points: {result.get('data_points_extracted', 0)} | "
+                f"Conflicts: {conflicts.get('total', 0)} "
+                f"({conflicts.get('critical', 0)} critical)"
+            ),
+        }
         return result
 
     # ── query ──────────────────────────────────────────────────────────────────
@@ -379,3 +422,26 @@ class Agent02(AgentBase):
             conn.commit()
 
         return result
+
+
+# ── Helpers ────────────────────────────────────────────────────────────────────
+
+def _build_extraction_text(
+    file_path:       str,
+    source_doc_hint: str | None,
+    case_name:       str | None,
+    result:          dict,
+) -> str:
+    """Build a concise text summary from ingestion metadata for entity extraction."""
+    from pathlib import Path as _Path
+    parts = [f"Document: {_Path(file_path).name}"]
+    if source_doc_hint:
+        parts.append(f"Category: {source_doc_hint}")
+    if case_name:
+        parts.append(f"Case: {case_name}")
+    n_dp = result.get("data_points_extracted", result.get("cells_written", 0))
+    if n_dp:
+        parts.append(f"Data points extracted: {n_dp}")
+    if result.get("text_excerpt"):
+        parts.append(f"Content excerpt: {result['text_excerpt'][:500]}")
+    return " | ".join(parts)

@@ -540,4 +540,13 @@ class Agent01(AgentBase):
             "cost_usd":        approx_cost,
             "primer_updates_count": primer_updates_count,
             "output_paths":    output_paths,  # populated in standalone; empty in tool_call
+            "_deal_context_section": {
+                "section_name": "Agent 01 — VDR Inventory Summary",
+                "content": (
+                    f"Files: {len(all_files)} | "
+                    f"Coverage: {round((s.present_nth + s.partial_nth) / max(s.present_nth + s.partial_nth + s.missing_nth, 1), 3):.1%} | "
+                    f"Present NTH: {s.present_nth} | Partial NTH: {s.partial_nth} | "
+                    f"Missing NTH: {s.missing_nth} | Novel: {s.novel_count}"
+                ),
+            },
         }

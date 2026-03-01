@@ -8,3 +8,35 @@ In planning mode, and for the above requirements, build out a spec and a framewo
 --------------------
 
 Answering the questions - 1. For each individual agent, let's have the ability to provide the LLM selection as an input parameter (with API key provision functionality as required). So there will be two LLMs implemented in each agent - there will be the main LLM that runs or oversees the task, which can be selected via input parameters; and secondly there will be a cheaper LLM for the quality layer to audit inputs and outputs. 2. Let's keep the JSON for now, and we move to SQLite when the number of agents increase to warrant it. 3. For the moment, improvements should always be human reviewed. However, let's have a running list of suggestions + result of human review. Once you see that a majority of the suggestions are being approved as suggested, we can give the user the option to toggle auto application above a confidence threshold as it shows their confidence in the system's suggestions. 4. cache domain knowledge per session as its unlikely to materially change during the session. Rework the plan document for these changes and provide it for review.
+
+
+Excel ingestion
+
+I now want to implement a agentic system for financial and operational data ingestion from the VDR to create a single source of truth for all numbers/data in a multi-purpose relational database system. Follow the same design principles and scaffolding as the other agents. 
+
+The agent should follow the same "2-LLM" methodology of other agents - one main LLM for working the tasks and the other audit LLM for auditing inputs and outputs. The agent should also be able to take 2 types of inputs via parameters - 
+
+  1. When called with just the VDR reference - either by an agent or by the user, it should scrape through the full folder tree, select the key files from the gold_standard checklists, and particularly for files with tables of financial or operational data (examples being the PDFs such as CPR, Information Memorandum, Management Presentation, historical audited or unaudited financials, monthly reports etc; and excel files such as the company's financial model, historical production and cost figures, Lease Operating Statements, etc) it should ingest these numbers and data points into individual SQL tables connected by context. 
+
+  2. When called with a specific file reference, it should similarly ingest that particular file and append it into the SQL database, with required connections and relationships to existing information via schema
+
+  3. When called with specific queries for information from the SQL database, it should return the required data as an array or a table as required, in a json format that is readable by the other agents / the user. 
+
+The agent should basically be the single source of truth for all numerical information in the VDR.
+  
+The agent should be aware of overlaps in information, different assumption "cases" for the same data, unit conversion and comparability, etc. Where required, the agent should call on the other agents for assistance - for example the 'financial calculator' agent can be called for unit conversion or domain-specific jargon/calculations, etc. 
+
+Further, and in particular for excel files, they should be ingested in a way where for each cell where applicable, both the numerical value as well as the associated exccel formula in the cell are stored in the database. Consequently, we are looking to implement a system where the agent is able to rerun calculations within the tables for modified assumptions, perform scenario analysis and work as a comprehensive financial analysis engine for the user. 
+
+For this requirement, in planning mode build out a detailed spec and save it as a mark down in the plan_docs folder. Ask any relevant questions as needed while you perform the task
+
+-----------------------------
+
+For the current agents available, prepare a comprehensive set of unit tests that will test the functionality of the agents, their ability to work together in the mesh and call on other agents as required, the outputs produced and their quality (and whether they pass audit or not). Confirm once the testing suite is prepared and save them as a markdown file in plan_docs folder.
+
+----------------------------
+
+Now run the full suite of current agents on the Corsair VDR. Produce a comprehensive summary report aimed at providing a holistic view of the deal and asset package to the board of the acquiring company. Include - 1. VDR quality and key document summary, with potential information gaps for further document request from seller; 2. Key data points about the assets, such as reserves, historical and forecast production profile, development resource opportunities and required capex, PV10 estimates and the price deck used, SWOT analysis, etc. Prepare the report as a well-formatted document with charts and tables as required. Ask any clarifying questions.
+
+----------------------------
+
