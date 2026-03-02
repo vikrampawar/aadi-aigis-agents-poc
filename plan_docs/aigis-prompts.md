@@ -40,3 +40,18 @@ Now run the full suite of current agents on the Corsair VDR. Produce a comprehen
 
 ----------------------------
 
+Enumerate all the "self learning" elements within the agent mesh system. Also think deeply around how these can be improved, particularly with respect to information retrieval, contextualisation of data, and strategic fit / company's view of the basis on which they make offers on assets. Prepare a mark down file in plan_docs folder for me to review.
+
+---------------------------
+
+All of them make sense. In planning mode, prepare a comprehensive spec document in plan_docs folder with a step-by-step implementation plan for all 3 improvements listed. Ask me questions in-line as you work through it for any design related decisions. Read through this repo on a cognitive memory system - https://github.com/topoteretes/cognee and pick up any interesting ideas we can use for implementing Aigis. Propose a plan for the embedding-based semantic retrieval as well for implementation.
+
+1. With respect to the DK router, rather than just matching file names / types, it should also semantically read through other files which might contain Domain Knowledge related elements in unlikely places. For example, typically Operating Committee Meeting slides / notes contain the JV partner plans for an asset. We should be able to review those, compare them to what's been assumed in the IM / Financial Model and flag any discrepancies for further human review. In this way, the Domain Knowledge mark down files can also be improved to flag these places for search in future VDRs
+
+2. Let's make the DealContext an actual mark down file stored within the aigis_agents/memory folder. As the agents run each task, the Deal Context is revised to provide a rich summary of the deal status and key learnings. Temporal weights are also a good idea. 
+
+3. Build out the buyer layer as a mark down file as proposed. There should be two ways that the system is able to learn this - one is via a straight Q&A sequence that can be called (currently via prompt, but eventually just a GUI button that shows the current buyer profile mark down file as well alongside while asking questoins that can fill it out and improve it). Second method is ongoing learning via feedback from tasks performed. For example, if the user says "Instead of the forward curve, use $60/bbl flat as the oil price deck to evaluate the transaction", or if they have comments after any output DD report, the agent system should understand this and ask for approval from the user if it should "remember" this for future use. That then naturally goes into the buyer profile structure. 
+
+-----------------------------
+
+

@@ -32,6 +32,11 @@ semantic = [
     "voyageai>=0.2",
     "sentence-transformers>=3.0",
 ]
+well_cards = [
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+    "plotly>=5.18",
+]
 
 [build-system]
 requires = ["hatchling"]

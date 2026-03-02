@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aigis Analytics — Agent System Reference</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;
+  --primary:#f0a500;--blue:#58a6ff;--green:#3fb950;--red:#f85149;
+  --purple:#bc8cff;--teal:#39d3bb;--orange:#f78166;
+  --text:#c9d1d9;--text-bright:#e6edf3;--text-muted:#8b949e;
+  --radius:8px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.6}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,#0d1117 0%,#161b22 60%,#1a1e2e 100%);border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:200;backdrop-filter:blur(8px)}
+.hdr-logo{font-size:32px;filter:drop-shadow(0 0 10px var(--primary))}
+.hdr-txt{flex:1}
+.hdr-title{font-size:21px;font-weight:700;color:var(--text-bright);letter-spacing:-.5px}
+.hdr-title span{color:var(--primary)}
+.hdr-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.hdr-pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.pill-g{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
+.pill-a{background:rgba(240,165,0,.15);color:var(--primary);border:1px solid rgba(240,165,0,.3)}
+.pill-b{background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.3)}
+
+/* ── TABS ── */
+.tabs-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;gap:0;overflow-x:auto;position:sticky;top:73px;z-index:199;scrollbar-width:none}
+.tabs-nav::-webkit-scrollbar{display:none}
+.tab-btn{padding:13px 18px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap;transition:color .2s,border-color .2s}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* ── CONTENT ── */
+.wrap{max-width:1400px;margin:0 auto;padding:32px}
+.pane{display:none}.pane.active{display:block}
+
+/* ── STAT CARDS ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-bottom:32px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;text-align:center;transition:border-color .2s}
+.stat:hover{border-color:var(--primary)}
+.stat-n{font-size:34px;font-weight:700;color:var(--primary);line-height:1}
+.stat-l{font-size:11px;color:var(--text-muted);margin-top:6px;line-height:1.3}
+
+/* ── SECTION ── */
+.sec-title{font-size:18px;font-weight:700;color:var(--text-bright);margin-bottom:6px}
+.sec-sub{color:var(--text-muted);font-size:12px;margin-bottom:22px}
+hr.div{border:none;border-top:1px solid var(--border);margin:32px 0}
+
+/* ── CARDS ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-bottom:28px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:rgba(240,165,0,.4);box-shadow:0 0 20px rgba(240,165,0,.06)}
+.card-hd{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.card-ico{font-size:26px;margin-top:2px}
+.card-title{font-size:15px;font-weight:700;color:var(--text-bright)}
+.card-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* ── CHIPS ── */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.chip{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.ch-a{background:rgba(240,165,0,.12);color:var(--primary);border:1px solid rgba(240,165,0,.25)}
+.ch-b{background:rgba(88,166,255,.12);color:var(--blue);border:1px solid rgba(88,166,255,.25)}
+.ch-g{background:rgba(63,185,80,.12);color:var(--green);border:1px solid rgba(63,185,80,.25)}
+.ch-p{background:rgba(188,140,255,.12);color:var(--purple);border:1px solid rgba(188,140,255,.25)}
+.ch-t{background:rgba(57,211,187,.12);color:var(--teal);border:1px solid rgba(57,211,187,.25)}
+.ch-r{background:rgba(248,81,73,.12);color:var(--red);border:1px solid rgba(248,81,73,.25)}
+.ch-o{background:rgba(247,129,102,.12);color:var(--orange);border:1px solid rgba(247,129,102,.25)}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:22px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--surface2);color:var(--text-bright);padding:10px 13px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:var(--primary)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+tbody td{padding:9px 13px;vertical-align:middle}
+.s-asc::after{content:' ↑';color:var(--primary)}
+.s-desc::after{content:' ↓';color:var(--primary)}
+
+/* ── MERMAID ── */
+.mmd-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:22px;overflow-x:auto}
+.mmd-title{font-size:13px;font-weight:600;color:var(--text-bright);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.mermaid{min-width:600px}
+.mermaid svg{max-width:100%;height:auto}
+
+/* ── CHART ── */
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:22px}
+.chart-title{font-size:13px;font-weight:600;color:var(--text-bright);margin-bottom:16px}
+.chart-wrap canvas{max-height:300px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+@media(max-width:768px){.grid-2{grid-template-columns:1fr}}
+
+/* ── ACCORDION ── */
+.acc{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.acc-hd{background:var(--surface);padding:13px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;justify-content:space-between;transition:background .15s}
+.acc-hd:hover,.acc-hd.open{background:var(--surface2)}
+.acc-hd.open{border-bottom:1px solid var(--border)}
+.acc-title{font-weight:600;font-size:14px;color:var(--text-bright);display:flex;align-items:center;gap:10px}
+.acc-arrow{transition:transform .2s;color:var(--text-muted);font-size:12px}
+.acc-arrow.open{transform:rotate(180deg)}
+.acc-body{display:none;padding:18px;background:var(--bg)}
+.acc-body.open{display:block}
+
+/* ── AGENT EXPAND ── */
+.agent-card{cursor:pointer}
+.agent-expand{display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.agent-expand.open{display:block}
+.expand-hint{font-size:11px;color:var(--text-muted);margin-top:10px;display:flex;align-items:center;gap:4px}
+
+/* ── PIPELINE ── */
+.pipeline{display:flex;flex-direction:column;gap:0}
+.pip-item{display:flex;align-items:flex-start;gap:14px;padding:8px 0}
+.pip-num-col{display:flex;flex-direction:column;align-items:center;min-width:32px}
+.pip-num{width:32px;height:32px;border-radius:50%;background:var(--primary);color:#000;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pip-num.sub{background:rgba(240,165,0,.2);color:var(--primary);font-size:10px}
+.pip-line{width:2px;height:100%;background:var(--border);flex:1;min-height:12px;margin-top:4px}
+.pip-content{flex:1;padding-bottom:4px}
+.pip-title{font-weight:600;color:var(--text-bright);font-size:13px}
+.pip-desc{font-size:12px;color:var(--text-muted);margin-top:1px}
+
+/* ── FLOWCHART ── */
+.fc{display:flex;flex-direction:column;align-items:center;padding:12px 8px;gap:0}
+.fc-node{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:11px 20px;width:340px;text-align:center;font-size:13px;font-weight:600;color:var(--text-bright);flex-shrink:0}
+.fc-node .fc-sub{font-size:11px;font-weight:400;color:var(--text-muted);margin-top:3px;line-height:1.4}
+.fn-start{background:rgba(63,185,80,.1);border-color:var(--green);color:var(--green)}
+.fn-start .fc-sub{color:rgba(63,185,80,.6)}
+.fn-end{background:rgba(63,185,80,.1);border-color:var(--green);color:var(--green)}
+.fn-end .fc-sub{color:rgba(63,185,80,.6)}
+.fn-red{background:rgba(248,81,73,.08);border-color:var(--red)}
+.fn-abort{background:rgba(248,81,73,.15);border-color:var(--red);color:var(--red)}
+.fn-abort .fc-sub{color:rgba(248,81,73,.6)}
+.fn-blue{background:rgba(88,166,255,.08);border-color:var(--blue)}
+.fn-teal{background:rgba(57,211,187,.08);border-color:var(--teal)}
+.fc-arr{color:var(--border);font-size:18px;line-height:1;margin:3px 0;width:340px;text-align:center}
+.fc-arr-ok{color:var(--green);font-size:11px;font-weight:700;margin:1px 0;width:340px;text-align:center}
+.fc-split{display:flex;align-items:flex-start;gap:0;width:100%;max-width:600px;justify-content:center}
+.fc-split-main{display:flex;flex-direction:column;align-items:center}
+.fc-split-side{display:flex;flex-direction:column;align-items:center;padding-top:36px}
+.fc-split-connector{display:flex;align-items:center;padding-top:11px;gap:0}
+.fc-split-hline{height:2px;width:40px;background:var(--red)}
+.fc-split-elabel{font-size:10px;font-weight:700;color:var(--red);white-space:nowrap;padding:0 4px}
+.fc-fork-row{display:flex;align-items:flex-start;width:100%;max-width:600px;justify-content:center;gap:0}
+.fc-fork-col{display:flex;flex-direction:column;align-items:center;width:200px}
+.fc-fork-hline{height:2px;width:100px;background:var(--teal)}
+.fc-fork-hline-muted{height:2px;width:100px;background:var(--border)}
+.fc-fork-lbl{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin:4px 0;white-space:nowrap}
+.fc-fork-lbl-teal{background:rgba(57,211,187,.12);color:var(--teal);border:1px solid rgba(57,211,187,.3)}
+.fc-fork-lbl-muted{background:rgba(139,148,158,.08);color:var(--text-muted);border:1px solid var(--border)}
+.fc-fork-pass{height:80px;width:2px;background:var(--border)}
+.fc-merge-bar{width:340px;height:2px;background:var(--border);margin-top:0}
+
+/* ── TIMELINE ── */
+.timeline{position:relative;padding-left:28px;margin-bottom:22px}
+.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--border)}
+.tl-item{position:relative;padding-bottom:24px;cursor:pointer}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{position:absolute;left:-35px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--border);transition:all .2s}
+.tl-dot.done{background:var(--green);border-color:var(--green)}
+.tl-dot.active-phase{background:var(--primary);border-color:var(--primary);box-shadow:0 0 8px rgba(240,165,0,.4)}
+.tl-phase{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}
+.tl-title{font-size:15px;font-weight:700;color:var(--text-bright);margin:3px 0}
+.tl-desc{font-size:12px;color:var(--text)}
+.tl-detail{display:none;margin-top:10px;padding:12px;background:var(--surface);border-radius:6px;border:1px solid var(--border)}
+.tl-detail.open{display:block}
+
+/* ── FILTER ── */
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.f-btn{padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:12px;transition:all .2s}
+.f-btn.active{background:var(--primary);color:#000;border-color:var(--primary);font-weight:600}
+.f-btn:hover:not(.active){border-color:var(--text-muted);color:var(--text)}
+
+/* ── METRIC GROUPS ── */
+.mg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:22px}
+.mg{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.mg-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.mg-item{font-size:12px;padding:2px 0;display:flex;align-items:center;gap:6px}
+.mg-item::before{content:'•';color:var(--text-muted)}
+
+/* ── PRINCIPLES ── */
+.prin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-bottom:28px}
+.prin{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;gap:12px;transition:border-color .2s}
+.prin:hover{border-color:rgba(240,165,0,.3)}
+.prin-n{font-size:22px;font-weight:700;color:var(--primary);opacity:.4;line-height:1;flex-shrink:0;width:28px}
+.prin-title{font-size:13px;font-weight:600;color:var(--text-bright);margin-bottom:3px}
+.prin-desc{font-size:11px;color:var(--text-muted)}
+
+/* ── STATUS DOT ── */
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.dot-g{background:var(--green)}
+.dot-m{background:var(--text-muted)}
+.dot-a{background:var(--primary)}
+
+/* ── PROGRESS ── */
+.prog{background:var(--border);border-radius:4px;height:5px;overflow:hidden;margin-top:3px}
+.prog-fill{height:100%;border-radius:4px;background:var(--primary);transition:width 1s ease}
+
+/* ── MISC ── */
+.bold{font-weight:600;color:var(--text-bright)}
+.muted{color:var(--text-muted)}
+.green{color:var(--green)}
+.blue{color:var(--blue)}
+.amber{color:var(--primary)}
+.red{color:var(--red)}
+.purple{color:var(--purple)}
+.teal{color:var(--teal)}
+.small{font-size:12px}
+.mono{font-family:'SFMono-Regular',Consolas,'Liberation Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px;border:1px solid var(--border)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:768px){.two-col{grid-template-columns:1fr}}
+.hidden{display:none}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
+<div class="hdr">
+  <div class="hdr-logo">⚡</div>
+  <div class="hdr-txt">
+    <div class="hdr-title"><span>Aigis</span> Analytics — Agent System Reference</div>
+    <div class="hdr-sub">Upstream Oil &amp; Gas M&amp;A Due Diligence · Multi-Agent AI Mesh · v1.3 · 01 Mar 2026</div>
+  </div>
+  <div class="hdr-pills">
+    <span class="pill pill-g">4 Agents Live</span>
+    <span class="pill pill-a">435 Tests ✓</span>
+    <span class="pill pill-b">Intelligence Layer Complete</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TABS NAV ═══════════════════════════════ -->
+<nav class="tabs-nav">
+  <button class="tab-btn active" data-tab="overview">Overview</button>
+  <button class="tab-btn" data-tab="agents">Production Agents</button>
+  <button class="tab-btn" data-tab="mesh">Mesh &amp; Intelligence</button>
+  <button class="tab-btn" data-tab="roadmap">Agent Roadmap</button>
+  <button class="tab-btn" data-tab="dk">Domain Knowledge</button>
+  <button class="tab-btn" data-tab="tests">Test Suite</button>
+</nav>
+
+<div class="wrap">
+
+<!-- ═══════════════════════════════ TAB: OVERVIEW ═══════════════════════════════ -->
+<section class="pane active" id="tab-overview">
+
+  <div class="stats">
+    <div class="stat"><div class="stat-n">4</div><div class="stat-l">Production<br>Agents</div></div>
+    <div class="stat"><div class="stat-n">19</div><div class="stat-l">Total Agents<br>Planned</div></div>
+    <div class="stat"><div class="stat-n">435</div><div class="stat-l">Tests<br>Passing</div></div>
+    <div class="stat"><div class="stat-n">25+</div><div class="stat-l">Financial<br>Metrics</div></div>
+    <div class="stat"><div class="stat-n">13</div><div class="stat-l">SQLite Tables<br>(Agent 02)</div></div>
+    <div class="stat"><div class="stat-n">87</div><div class="stat-l">Checklist Items<br>(Agent 01)</div></div>
+    <div class="stat"><div class="stat-n">9</div><div class="stat-l">Domain Knowledge<br>Playbooks</div></div>
+    <div class="stat"><div class="stat-n">4</div><div class="stat-l">Intelligence Layer<br>Phases ✓</div></div>
+  </div>
+
+  <div class="sec-title">What is Aigis?</div>
+  <div class="sec-sub" style="margin-bottom:16px;font-size:13px;color:var(--text);max-width:900px">
+    Aigis is an AI-powered due diligence platform for <strong class="amber">upstream oil &amp; gas M&amp;A transactions</strong>. It ingests Virtual Data Rooms (VDRs) and runs a composable multi-agent mesh against company-specific domain knowledge playbooks to produce structured DD reports — replacing weeks of analyst work with minutes of citation-grounded AI analysis. Primary focus: Gulf of Mexico producing assets.
+  </div>
+
+  <hr class="div">
+  <div class="sec-title">System Architecture</div>
+  <div class="sec-sub">End-to-end data flow from VDR ingestion to deal analysis outputs</div>
+
+  <div class="mmd-wrap">
+    <div class="mmd-title">Data Flow &amp; Component Map</div>
+    <div class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1c2128', 'primaryTextColor': '#c9d1d9', 'primaryBorderColor': '#30363d', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117', 'edgeLabelBackground': '#1c2128', 'nodeBorder': '#30363d'}}}%%
+flowchart LR
+    subgraph IN["Inputs"]
+        VDR["Virtual Data Room\n(files / CSV / DB)"]
+        FIN["Financial Inputs\n(assumptions JSON)"]
+    end
+    subgraph PROD["Production Agents"]
+        A01["Agent 01\nVDR Inventory\n& Gap Analyst"]
+        A02["Agent 02\nData Store\n& Consistency"]
+        A04["Agent 04\nFinance\nCalculator"]
+        A07["Agent 07\nWell Cards\n& DCA"]
+    end
+    subgraph MESH["Mesh Infrastructure"]
+        direction TB
+        BASE["AgentBase\n10-step pipeline"]
+        DK["SemanticDKRouter\nDomain Knowledge"]
+        INTEL["Intelligence Layer\nBuyer · Deal · Graph"]
+    end
+    subgraph OUT["Outputs"]
+        O1["Gap Report\n+ DRL DOCX"]
+        O2["SQLite DB\n13 tables"]
+        O3["25+ Financial\nMetrics + Sensitivity"]
+        O4["Audit Log\n+ Deal Context MD"]
+        O7["Well Cards\nmd + html + png"]
+    end
+    VDR --> A01
+    VDR --> A02
+    FIN --> A04
+    A01 -->|inventory| A02
+    A02 -->|data| A04
+    A02 -->|prod series| A07
+    MESH -.->|runs inside| A01
+    MESH -.->|runs inside| A02
+    MESH -.->|runs inside| A04
+    MESH -.->|runs inside| A07
+    A01 --> O1
+    A02 --> O2
+    A04 --> O3
+    BASE --> O4
+    A07 --> O7
+    DK --> BASE
+    INTEL --> BASE
+    </div>
+  </div>
+
+  <div class="mmd-wrap">
+    <div class="mmd-title">Agent Dependency Chain</div>
+    <div class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1c2128', 'primaryTextColor': '#c9d1d9', 'primaryBorderColor': '#30363d', 'lineColor': '#58a6ff'}}}%%
+graph LR
+    A01["01 VDR Inventory"] -->|"provides doc list"| A02["02 Data Store"]
+    A02 -->|"provides data"| A04["04 Finance Calc"]
+    A04 -.->|"formula delegation"| A02
+    A01 -->|"doc list"| A08["08 HSE Scanner"]
+    A02 --> A07["07 Well Cards"]
+    A02 --> A15["15 Seller Model RE"]
+    A04 --> A10["10 ARO Aggregator"]
+    A04 --> A12["12 Debt Schedule"]
+    A09["09 Contract Extractor"] --> A11["11 Licence Checker"]
+    A09 --> A16["16 Title Validator"]
+    A01 --> A09
+    A02 --> A04
+    A04 --> A15
+    A01 & A02 & A04 & A08 & A09 & A10 & A11 & A12 & A16 --> A19["19 Risk Scorer"]
+    A01 & A09 & A11 & A12 & A16 --> A20["20 Integration Plan"]
+    A06["06 Q&amp;A Engine"] -.->|"queries all"| A01 & A02 & A04
+    style A01 fill:#1c3a1c,stroke:#3fb950
+    style A02 fill:#1c3a1c,stroke:#3fb950
+    style A04 fill:#1c3a1c,stroke:#3fb950
+    style A07 fill:#1c3a1c,stroke:#3fb950
+    style A06 fill:#1e2d3d,stroke:#58a6ff
+    style A19 fill:#2d1e1e,stroke:#f85149
+    style A20 fill:#2d1e1e,stroke:#f85149
+    </div>
+  </div>
+
+  <hr class="div">
+  <div class="sec-title">Design Principles</div>
+  <div class="sec-sub">10 non-negotiable rules applied to every agent and every run</div>
+
+  <div class="prin-grid">
+    <div class="prin"><div class="prin-n">1</div><div><div class="prin-title">Stack-Agnostic</div><div class="prin-desc">Agents as logical units. No vendor lock-in. Callable from LangGraph, AutoGen, FastAPI, notebooks, or CLI.</div></div></div>
+    <div class="prin"><div class="prin-n">2</div><div><div class="prin-title">Composable</div><div class="prin-desc">Every agent registered in toolkit.json as a callable tool. Discovery-based routing via ToolkitRegistry.</div></div></div>
+    <div class="prin"><div class="prin-n">3</div><div><div class="prin-title">Human-in-the-Loop</div><div class="prin-desc">All 🔴 Critical findings and improvement suggestions require explicit human review before applying.</div></div></div>
+    <div class="prin"><div class="prin-n">4</div><div><div class="prin-title">Citation-Mandatory</div><div class="prin-desc">Every extracted fact carries: source_doc, section, page, verbatim quote, confidence. No assertion without evidence.</div></div></div>
+    <div class="prin"><div class="prin-n">5</div><div><div class="prin-title">Free-First Data Sources</div><div class="prin-desc">EIA, BSEE, NPD Factpages, SEC EDGAR — free public APIs primary. Paid upgrades noted but not required.</div></div></div>
+    <div class="prin"><div class="prin-n">6</div><div><div class="prin-title">Dual-Mode Output</div><div class="prin-desc"><span class="mono">standalone</span> → full MD report + files. <span class="mono">tool_call</span> → compact JSON, no file I/O.</div></div></div>
+    <div class="prin"><div class="prin-n">7</div><div><div class="prin-title">Dual-LLM Per Agent</div><div class="prin-desc">main_model (gpt-4.1 default) for core logic + audit_model (gpt-4.1-mini) for quality validation.</div></div></div>
+    <div class="prin"><div class="prin-n">8</div><div><div class="prin-title">Memory-Persistent</div><div class="prin-desc">Patterns accumulate across runs. Human-reviewed suggestions. Auto-apply unlocks at ≥80% approval + ≥10 reviews.</div></div></div>
+    <div class="prin"><div class="prin-n">9</div><div><div class="prin-title">Domain-Grounded</div><div class="prin-desc">Agents declare DK_TAGS. Router loads matching playbooks. Phase C adds semantic vector search. Session-cached.</div></div></div>
+    <div class="prin"><div class="prin-n">10</div><div><div class="prin-title">Transparent Workings</div><div class="prin-desc">Every calculation shows reasoning, formula, source. Full audit trail in JSONL. No black-box outputs.</div></div></div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════ TAB: PRODUCTION AGENTS ═══════════════════════════════ -->
+<section class="pane" id="tab-agents">
+
+  <div class="sec-title">Production Agents</div>
+  <div class="sec-sub">Click any card to expand full detail — inputs, outputs, pipeline, and domain tags</div>
+
+  <div class="grid-2" style="margin-bottom:22px">
+    <div class="chart-wrap">
+      <div class="chart-title">Agent Portfolio — Status Distribution</div>
+      <canvas id="chartStatus"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">Agent Portfolio — Tier Distribution</div>
+      <canvas id="chartTier"></canvas>
+    </div>
+  </div>
+
+  <!-- Agent 01 -->
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">
+      <div class="acc-title">
+        <span style="background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);padding:2px 8px;border-radius:4px;font-size:11px">✓ PRODUCTION v2.0</span>
+        Agent 01 — VDR Document Inventory &amp; Gap Analyst
+      </div>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      <div class="two-col">
+        <div>
+          <p class="small" style="margin-bottom:12px;color:var(--text)">Enumerates the full VDR structure, classifies every document against an 87-item gold-standard upstream DD checklist, and generates a pointed Data Request List (DRL) ready to email to seller advisors. Three enumeration modes: filesystem crawl, platform export CSV, or pre-classified DB. Three-stage classification pipeline cuts LLM calls by ~60%.</p>
+          <div class="chips">
+            <span class="chip ch-a">DK: vdr_structure</span>
+            <span class="chip ch-a">DK: checklist</span>
+            <span class="chip ch-a">DK: upstream_dd</span>
+            <span class="chip ch-b">Sprint 1</span>
+            <span class="chip ch-g">Quick Win Tier</span>
+          </div>
+          <div style="margin-top:16px">
+            <div class="bold small" style="margin-bottom:8px">Classification Pipeline</div>
+            <div class="pipeline">
+              <div class="pip-item">
+                <div class="pip-num-col"><div class="pip-num">1</div><div class="pip-line"></div></div>
+                <div class="pip-content"><div class="pip-title">Keyword Match</div><div class="pip-desc">Pattern matching against 87-item checklist. Fast, no LLM. Handles 40–60% of VDR.</div></div>
+              </div>
+              <div class="pip-item">
+                <div class="pip-num-col"><div class="pip-num">2</div><div class="pip-line"></div></div>
+                <div class="pip-content"><div class="pip-title">Fuzzy Match (rapidfuzz)</div><div class="pip-desc">Token sort ratio ≥ threshold → assign without LLM. Handles remaining unmatched files.</div></div>
+              </div>
+              <div class="pip-item">
+                <div class="pip-num-col"><div class="pip-num">3</div></div>
+                <div class="pip-content"><div class="pip-title">LLM Classification (gpt-4.1, batched)</div><div class="pip-desc">Only truly ambiguous files reach the LLM. System prompt + dk_context → classify + reason.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Input Parameter</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">deal_id</td><td>str</td><td><span class="chip ch-r">✓</span></td><td>Deal UUID</td></tr>
+                <tr><td class="mono">deal_type</td><td>enum</td><td><span class="chip ch-r">✓</span></td><td>producing_asset / exploration / development / corporate</td></tr>
+                <tr><td class="mono">jurisdiction</td><td>enum</td><td><span class="chip ch-r">✓</span></td><td>GoM / UKCS / Norway / International</td></tr>
+                <tr><td class="mono">vdr_path</td><td>str</td><td>—</td><td>Local folder path to VDR files</td></tr>
+                <tr><td class="mono">vdr_export_csv</td><td>str</td><td>—</td><td>VDR platform export CSV/XLSX</td></tr>
+                <tr><td class="mono">use_db</td><td>bool</td><td>—</td><td>Query pre-classified PostgreSQL DB</td></tr>
+                <tr><td class="mono">round_number</td><td>int</td><td>—</td><td>DRL round (default 1)</td></tr>
+                <tr><td class="mono">main_model</td><td>str</td><td>—</td><td>Default: gpt-4.1</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Output Key</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">coverage_score</td><td class="small muted">0–100% of 87 checklist items covered</td></tr>
+                <tr><td class="mono">missing_nth</td><td class="small muted">Need-to-have docs absent from VDR</td></tr>
+                <tr><td class="mono">partial_nth</td><td class="small muted">Need-to-have docs present but incomplete</td></tr>
+                <tr><td class="mono">missing_gth</td><td class="small muted">Good-to-have gaps</td></tr>
+                <tr><td class="mono">novel_count</td><td class="small muted">Documents not in checklist (self-learning)</td></tr>
+                <tr><td colspan="2" class="small muted" style="border-top:1px solid var(--border)">Files: <span class="mono">01_vdr_inventory.json</span> · <span class="mono">01_gap_analysis_report.md</span> · <span class="mono">01_data_request_list.docx</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent 02 -->
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">
+      <div class="acc-title">
+        <span style="background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);padding:2px 8px;border-radius:4px;font-size:11px">✓ PRODUCTION v1.0</span>
+        Agent 02 — VDR Financial &amp; Operational Data Store
+      </div>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      <div class="two-col">
+        <div>
+          <p class="small" style="margin-bottom:12px;color:var(--text)">Single source of truth for all financial &amp; operational numerical data from a VDR. Ingests Excel (cell-level with formulas via two-pass openpyxl), PDF (LLM-assisted table extraction), and CSV. Stores into typed SQLite (13 tables). Three operation modes. Merged Agent 03 (Consistency Auditor) — cross-source conflict detection built in. Optional PostgreSQL sync for cross-deal analytics.</p>
+          <div class="chips">
+            <span class="chip ch-a">DK: financial</span>
+            <span class="chip ch-a">DK: technical</span>
+            <span class="chip ch-a">DK: upstream_dd</span>
+            <span class="chip ch-a">DK: oil_gas_101</span>
+            <span class="chip ch-b">Sprint 2</span>
+          </div>
+          <div style="margin-top:16px">
+            <div class="bold small" style="margin-bottom:6px">Three Operation Modes</div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>Mode</th><th>What it does</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="mono">ingest_vdr</span></td><td class="small muted">Full VDR folder walk, classify files via Agent 01, extract all data</td></tr>
+                  <tr><td><span class="mono">ingest_file</span></td><td class="small muted">Single file ingestion (Excel / PDF / CSV) with consistency check</td></tr>
+                  <tr><td><span class="mono">query</span></td><td class="small muted">NL→SQL or direct SQL against deal DB; scenario re-evaluation</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="bold small" style="margin-bottom:6px;margin-top:12px">Conflict Detection Thresholds</div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>Severity</th><th>Trigger</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="chip ch-r">CRITICAL</span></td><td class="small">&gt;20% variance across sources</td><td class="small muted">Flagged in conflict report, human review required</td></tr>
+                  <tr><td><span class="chip ch-a">WARNING</span></td><td class="small">5–20% variance</td><td class="small muted">Logged, shown in ingestion report</td></tr>
+                  <tr><td><span class="chip ch-b">INFO</span></td><td class="small">1–5% variance</td><td class="small muted">Logged for reference</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="bold small" style="margin-bottom:8px">SQLite Schema — 13 Tables</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Table</th><th>Content</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">deals</td><td class="small muted">Deal metadata, type, jurisdiction</td></tr>
+                <tr><td class="mono">documents</td><td class="small muted">All ingested files with classification</td></tr>
+                <tr><td class="mono">production_series</td><td class="small muted">Time-series production (oil/gas/water, BOE/d)</td></tr>
+                <tr><td class="mono">reserve_estimates</td><td class="small muted">1P/2P/3P by case, CPR references</td></tr>
+                <tr><td class="mono">financial_summaries</td><td class="small muted">Revenue, EBITDA, FCF by period</td></tr>
+                <tr><td class="mono">cost_items</td><td class="small muted">LOE, G&amp;A, Capex, ARO line items</td></tr>
+                <tr><td class="mono">fiscal_terms</td><td class="small muted">Royalty, BPO, tax rates by licence</td></tr>
+                <tr><td class="mono">excel_cells</td><td class="small muted">Cell-level extraction (formula + cached value)</td></tr>
+                <tr><td class="mono">excel_sheets</td><td class="small muted">Sheet metadata, ingest notes, circular refs</td></tr>
+                <tr><td class="mono">data_conflicts</td><td class="small muted">Cross-source discrepancies, severity</td></tr>
+                <tr><td class="mono">ingestion_log</td><td class="small muted">Per-file ingestion audit trail</td></tr>
+                <tr><td class="mono">concept_nodes/edges</td><td class="small muted">Entity knowledge graph (Phase D)</td></tr>
+                <tr><td class="mono">propositions</td><td class="small muted">Subject-predicate-object facts (Phase D)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent 04 -->
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">
+      <div class="acc-title">
+        <span style="background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);padding:2px 8px;border-radius:4px;font-size:11px">✓ PRODUCTION v2.0</span>
+        Agent 04 — Upstream Finance Calculator
+      </div>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      <div class="two-col">
+        <div>
+          <p class="small" style="margin-bottom:12px;color:var(--text)">Self-contained financial calculation engine. Builds n-year cash flow schedule (production decline + cost escalation). Computes 25+ financial metrics with full audit trail. Runs tornado sensitivity analysis. Validates against basin-specific benchmarks. Supports three fiscal regime types (concessionary, PSC, service contract).</p>
+          <div class="chips">
+            <span class="chip ch-a">DK: financial</span>
+            <span class="chip ch-a">DK: oil_gas_101</span>
+            <span class="chip ch-b">Sprint 1</span>
+            <span class="chip ch-g">Quick Win Tier</span>
+          </div>
+          <div style="margin-top:16px">
+            <div class="bold small" style="margin-bottom:6px">Case Taxonomy (multi-case support)</div>
+            <div class="chips">
+              <span class="chip ch-b">management_case</span>
+              <span class="chip ch-b">cpr_base_case</span>
+              <span class="chip ch-b">cpr_low_case</span>
+              <span class="chip ch-b">cpr_high_case</span>
+              <span class="chip ch-b">conservative_case</span>
+              <span class="chip ch-b">mid_case</span>
+            </div>
+          </div>
+          <div style="margin-top:14px">
+            <div class="bold small" style="margin-bottom:6px">Fiscal Regime Types</div>
+            <div class="chips">
+              <span class="chip ch-p">Concessionary (royalty + corp tax)</span>
+              <span class="chip ch-p">PSC (cost oil + profit oil)</span>
+              <span class="chip ch-p">Service Contract</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="bold small" style="margin-bottom:8px">25+ Financial Metrics</div>
+          <div class="mg-grid" style="margin-bottom:0">
+            <div class="mg">
+              <div class="mg-title amber">Valuation</div>
+              <div class="mg-item">NPV at 10% (PV10)</div>
+              <div class="mg-item">Value Creation</div>
+              <div class="mg-item">EV / 2P ($/BOE)</div>
+              <div class="mg-item">EV / 1P ($/BOE)</div>
+              <div class="mg-item">EV / BOE/d</div>
+              <div class="mg-item">EV / EBITDA</div>
+            </div>
+            <div class="mg">
+              <div class="mg-title blue">Returns</div>
+              <div class="mg-item">IRR (unlevered)</div>
+              <div class="mg-item">Payback (years)</div>
+              <div class="mg-item">MOIC</div>
+              <div class="mg-item">Borrowing Base</div>
+              <div class="mg-item">DSCR</div>
+              <div class="mg-item">LLCR</div>
+            </div>
+            <div class="mg">
+              <div class="mg-title green">Cost Metrics</div>
+              <div class="mg-item">LOE / BOE</div>
+              <div class="mg-item">Total Opex / BOE</div>
+              <div class="mg-item">Netback ($/bbl)</div>
+              <div class="mg-item">Cash Breakeven</div>
+              <div class="mg-item">Full-Cycle Breakeven</div>
+            </div>
+            <div class="mg">
+              <div class="mg-title purple">Reserves</div>
+              <div class="mg-item">EUR (MMBoe)</div>
+              <div class="mg-item">Decline Rate (%/yr)</div>
+              <div class="mg-item">Reserve Replacement</div>
+              <div class="mg-item">Recycle Ratio</div>
+              <div class="mg-item">Water Cut (%)</div>
+              <div class="mg-item">GOR (scf/bbl)</div>
+            </div>
+            <div class="mg">
+              <div class="mg-title teal">Fiscal</div>
+              <div class="mg-item">Government Take (%)</div>
+              <div class="mg-item">Net Revenue Interest</div>
+              <div class="mg-item">Royalty (effective)</div>
+              <div class="mg-item">After-Tax IRR</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent 07 -->
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">
+      <div class="acc-title">
+        <span style="background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3);padding:2px 8px;border-radius:4px;font-size:11px">✓ PRODUCTION v1.0</span>
+        Agent 07 — Well Performance Intelligence Cards
+      </div>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      <div class="two-col">
+        <div>
+          <p class="small" style="margin-bottom:12px;color:var(--text)">Generates one-page Well Intelligence Cards per well, plus a fleet-level portfolio summary — replicating how a senior reservoir engineer approaches well performance review in M&amp;A DD. Fits scipy Arps hyperbolic decline curves (→ exponential fallback), assigns traffic-light RAG status (GREEN/AMBER/RED/BLACK), and generates LLM narrative with specific numbers and red flags. Outputs matplotlib per-well PNGs + Plotly HTML fleet dashboard. Two modes: single-well JSON card or full fleet run.</p>
+          <div class="chips">
+            <span class="chip ch-a">DK: technical</span>
+            <span class="chip ch-a">DK: upstream_dd</span>
+            <span class="chip ch-a">DK: oil_gas_101</span>
+            <span class="chip ch-b">Sprint 3</span>
+            <span class="chip ch-g">Quick Win Tier</span>
+          </div>
+          <div style="margin-top:16px">
+            <div class="bold small" style="margin-bottom:6px">Arps DCA Engine</div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>Parameter</th><th>GoM Bounds</th><th>Interpretation</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">b-factor</td><td class="small">0.05–1.0</td><td class="small muted">b=0.35–0.65 typical GoM Miocene; b&gt;0.8 flagged AMBER</td></tr>
+                  <tr><td class="mono">Di annual</td><td class="small">12–600%/yr</td><td class="small muted">Initial 15–25%/yr typical; terminal 3–6%/yr</td></tr>
+                  <tr><td class="mono">curve_type</td><td class="small">hyperbolic / exponential</td><td class="small muted">Exponential fallback if fit fails or ≤5 data points</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="bold small" style="margin-bottom:6px;margin-top:12px">RAG Classification Logic</div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>Status</th><th>Primary Trigger</th><th>Secondary Escalation</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="chip ch-g">GREEN</span></td><td class="small">Actual rate within ±10% of forecast</td><td class="small muted">GOR &lt;20%/yr rise; WC &lt;8 ppts/yr</td></tr>
+                  <tr><td><span class="chip ch-a">AMBER</span></td><td class="small">-10% to -25% vs forecast</td><td class="small muted">GOR +20–40%/yr or WC +8–15 ppts/yr or b&gt;0.8</td></tr>
+                  <tr><td><span class="chip ch-r">RED</span></td><td class="small">&gt;25% below forecast</td><td class="small muted">GOR &gt;40%/yr or WC &gt;15 ppts/yr or R²&lt;0.70</td></tr>
+                  <tr><td><span style="background:#222;color:#888;border:1px solid #555;padding:2px 8px;border-radius:4px;font-size:11px">BLACK</span></td><td class="small">Shut-in (zero rate)</td><td class="small muted">Override all — requires explicit well_status flag</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="bold small" style="margin-bottom:8px">8 Modules</div>
+          <div class="tbl-wrap" style="margin-bottom:16px">
+            <table>
+              <thead><tr><th>Module</th><th>Role</th></tr></thead>
+              <tbody>
+                <tr><td class="mono small">dca_engine.py</td><td class="small muted">scipy Arps fitting, EUR integration, DCAResult dataclass</td></tr>
+                <tr><td class="mono small">production_processor.py</td><td class="small muted">Agent 02 SQLite queries, downtime normalization, GOR/WC computation</td></tr>
+                <tr><td class="mono small">rag_classifier.py</td><td class="small muted">Traffic-light classification, RAGResult, pattern override logic</td></tr>
+                <tr><td class="mono small">chart_generator.py</td><td class="small muted">matplotlib 3-panel per-well PNGs; Plotly 2×2 fleet HTML dashboard</td></tr>
+                <tr><td class="mono small">well_card_builder.py</td><td class="small muted">Orchestrator: calls DCA + RAG + LLM narrative (DCA_REVIEW_PROMPT)</td></tr>
+                <tr><td class="mono small">report_generator.py</td><td class="small muted">MD report assembly with embedded chart paths</td></tr>
+                <tr><td class="mono small">agent.py</td><td class="small muted">Agent07(AgentBase)._run() — top-level orchestrator; fleet + single-well</td></tr>
+                <tr><td class="mono small">__main__.py</td><td class="small muted">CLI entry: python -m aigis_agents.agent_07_well_cards --deal-id X</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Output Key</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">rag_status</td><td class="small muted">GREEN / AMBER / RED / BLACK per well</td></tr>
+                <tr><td class="mono">metrics</td><td class="small muted">current_rate, peak_rate, cumulative, ip30/90/180, GOR, WC, uptime</td></tr>
+                <tr><td class="mono">decline_curve</td><td class="small muted">qi, Di_annual_pct, b_factor, eur_mmboe, fit_r2, curve_type</td></tr>
+                <tr><td class="mono">flags</td><td class="small muted">Red flag strings from DCA review + secondary thresholds</td></tr>
+                <tr><td class="mono">narrative</td><td class="small muted">3–4 sentence LLM reservoir engineer narrative with cited numbers</td></tr>
+                <tr><td colspan="2" class="small muted" style="border-top:1px solid var(--border)">Files (fleet standalone): <span class="mono">07_well_performance_report.md</span> · <span class="mono">07_fleet_dashboard.html</span> · <span class="mono">07_well_charts/*.png</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════ TAB: MESH & INTELLIGENCE ═══════════════════════════════ -->
+<section class="pane" id="tab-mesh">
+
+  <div class="sec-title">AgentBase — 10-Step Invocation Pipeline</div>
+  <div class="sec-sub">Every agent runs this pipeline. Steps 5.5–5.7 and 9.5, 10.5 are Intelligence Layer additions.</div>
+
+  <div class="mmd-wrap">
+    <div class="mmd-title">invoke() Pipeline Flow &nbsp;·&nbsp; <span style="color:var(--green)">■</span> start/end &nbsp;<span style="color:var(--red)">■</span> audit gate &nbsp;<span style="color:var(--blue)">■</span> IL context load &nbsp;<span style="color:var(--teal)">■</span> IL learning</div>
+    <div class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1c2128', 'primaryTextColor': '#c9d1d9', 'primaryBorderColor': '#30363d', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#0d1117', 'edgeLabelBackground': '#1c2128', 'nodeBorder': '#30363d'}}}%%
+flowchart TD
+    ENTRY["invoke()\nAgentBase entry point - called by all 4 production agents"]
+    S1["1 - Resolve Models\nmain_model + audit_model from params or toolkit defaults"]
+    S2["2 - Resolve API Keys\nenv vars first, then session_keys dict"]
+    S3["3 - Instantiate LLMs\nget_chat_model for main_llm and audit_llm"]
+    S4["4 - Input Audit\nAuditLayer.check_inputs validates all required fields and types"]
+    ABORT["ABORT\nReturn error dict immediately"]
+    S5["5 - Load Domain Knowledge\nSemanticDKRouter: Phase 1 tag match + Phase 2 semantic KNN"]
+    S55["5.5 - Load Buyer Context\nbuyer_profile.md injected into system prompt"]
+    S56["5.6 - Load Deal Context\ndeal_context.md: per-deal accumulating prior knowledge"]
+    S57["5.7 - Load Entity Context\nConceptGraph.get_deal_context_summary"]
+    S6["6 - Load Memory Patterns\nlearned_patterns.json: HIGH + MEDIUM weight only"]
+    S7["7 - Core Agent Logic\n_run called with dk, buyer, deal, entity + pattern context"]
+    S8["8 - Output Audit\ncheck_outputs: confidence, citation coverage, red flag tagging"]
+    S95["9.5 - Preference Detection\nAuditLayer.detect_preferences scans for buyer signals"]
+    PREF["Remember Preference\napply_signal updates buyer_profile.md"]
+    S10["10 - Log to JSONL Audit Log\nFull audit record appended to _audit_log.jsonl per deal"]
+    S105["10.5 - Update Deal Context\n_deal_context_section auto-detected in result and persisted"]
+    RESULT["Return formatted result\nstandalone: full MD report + files\ntool_call: compact JSON, no file I/O"]
+    ENTRY --> S1 --> S2 --> S3 --> S4
+    S4 -->|ERROR| ABORT
+    S4 -->|OK| S5
+    S5 --> S55 --> S56 --> S57 --> S6 --> S7 --> S8 --> S95
+    S95 -->|standalone| PREF --> S10
+    S95 -->|tool_call| S10
+    S10 --> S105 --> RESULT
+    classDef startEnd fill:#1c3a1c,stroke:#3fb950,color:#e6edf3,font-weight:bold
+    classDef normal fill:#1c2128,stroke:#30363d,color:#c9d1d9
+    classDef auditGate fill:#2d1e1e,stroke:#f85149,color:#e6edf3
+    classDef abortNode fill:#3d1212,stroke:#f85149,color:#f85149,font-weight:bold
+    classDef intelBlue fill:#1e2d3d,stroke:#58a6ff,color:#e6edf3
+    classDef intelTeal fill:#152a2a,stroke:#39d3bb,color:#e6edf3
+    class ENTRY,RESULT startEnd
+    class S1,S2,S3,S5,S6,S7,S8,S10 normal
+    class S4 auditGate
+    class ABORT abortNode
+    class S55,S56,S57 intelBlue
+    class S95,PREF,S105 intelTeal
+    </div>
+  </div>
+
+  <hr class="div">
+  <div class="sec-title">Mesh Infrastructure Modules</div>
+  <div class="sec-sub">15 modules in aigis_agents/mesh/ — shared across all agents</div>
+
+  <div class="tbl-wrap">
+    <table id="meshTable">
+      <thead><tr><th onclick="sortTable(this,0)">Module</th><th onclick="sortTable(this,1)">Phase</th><th onclick="sortTable(this,2)">Status</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">agent_base.py</td><td>Core</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">AgentBase class — 10-step pipeline orchestrator. All agents inherit this.</td></tr>
+        <tr><td class="mono">audit_layer.py</td><td>Core</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">Dual-LLM input/output auditor + JSONL log + detect_preferences() + check_doc_contradictions()</td></tr>
+        <tr><td class="mono">domain_knowledge.py</td><td>Core</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">Session-cached tag-based DK file loader. Reads matching playbooks per agent DK_TAGS.</td></tr>
+        <tr><td class="mono">memory_manager.py</td><td>Core</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">JSON-backed per-agent persistent memory: learned_patterns, improvement_history, run_history. Temporal weighting (HIGH/MEDIUM/STALE).</td></tr>
+        <tr><td class="mono">toolkit_registry.py</td><td>Core</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">Loads toolkit.json, resolves agent class references and LLM defaults.</td></tr>
+        <tr><td class="mono">review_memory.py</td><td>Core</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">CLI tool for reviewing and applying learned pattern suggestions. Auto-apply management.</td></tr>
+        <tr><td class="mono">buyer_profile_manager.py</td><td>Phase A</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">Persistent buyer_profile.md (8 sections). Q&A wizard (20 questions). PreferenceSignal detection and apply_signal().</td></tr>
+        <tr><td class="mono">deal_context.py</td><td>Phase B</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">Per-deal accumulating markdown. DealContextManager: load(), update_section(), append_run_log(), get_summary().</td></tr>
+        <tr><td class="mono">embeddings.py</td><td>Phase C</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">Provider-agnostic EmbeddingProvider: openai/ voyage/ local/ prefix dispatch. from_config() factory.</td></tr>
+        <tr><td class="mono">vector_store.py</td><td>Phase C</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">VectorStore: sqlite-vec KNN backend + pure-Python cosine fallback. VectorHit dataclass.</td></tr>
+        <tr><td class="mono">semantic_dk_router.py</td><td>Phase C</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">SemanticDKRouter: Phase 1 tag-based + Phase 2 semantic KNN merged retrieval. Wraps domain_knowledge.py.</td></tr>
+        <tr><td class="mono">concept_graph.py</td><td>Phase D</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">ConceptGraph: SQLite entity/proposition knowledge graph. find_contradictions() · get_deal_context_summary() · neighbours() BFS.</td></tr>
+        <tr><td class="mono">entity_extractor.py</td><td>Phase D</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">EntityExtractor: LLM-driven extraction of entities, propositions, relationships from document text. extract_and_store().</td></tr>
+        <tr><td class="mono">hidden_dk_detector.py</td><td>Phase D</td><td><span class="dot dot-g"></span>Built</td><td class="small muted">HiddenDKDetector: scan_for_hidden_dk() finds domain knowledge in unexpected docs. check_contradictions() cross-doc comparison.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="div">
+  <div class="sec-title">Intelligence Layer — Phases A–D</div>
+  <div class="sec-sub">Click each phase to expand implementation details. All 4 phases complete as of 01 Mar 2026.</div>
+
+  <div class="timeline">
+    <div class="tl-item" onclick="togglePhase(this)">
+      <div class="tl-dot done"></div>
+      <div class="tl-phase">Phase A</div>
+      <div class="tl-title">Buyer Profile Layer <span class="chip ch-g" style="font-size:10px;vertical-align:middle">✓ COMPLETE</span></div>
+      <div class="tl-desc">Persistent buyer preferences, financial thresholds, and strategy injected into every agent run. Q&A wizard for initial setup. Preference learning from standalone mode interactions.</div>
+      <div class="chips" style="margin-top:8px"><span class="chip ch-b">buyer_profile_manager.py</span><span class="chip ch-b">memory/buyer_profile.md</span><span class="chip ch-b">audit_layer.detect_preferences()</span><span class="chip ch-b">agent_base step 9.5</span></div>
+      <div class="tl-detail">
+        <div class="two-col">
+          <div>
+            <div class="bold small" style="margin-bottom:8px">buyer_profile.md — 8 Sections</div>
+            <div class="small muted">1. Investment Thesis &amp; Basin Focus<br>2. Financial Thresholds (min IRR, max LOE/BOE, hurdle rate, max ARO)<br>3. Operational Capabilities (GoM ops?, subsea?, max WI%)<br>4. Price Preferences (oil/gas deck, escalation assumption)<br>5. Strategic Premiums (operatorship, exploration upside, CVR appetite)<br>6. Portfolio State (current production, existing infrastructure)<br>7. Negotiation Preferences (structure, timeline, deal-breakers)<br>8. Learning Log (auto-appended when preferences confirmed)</div>
+          </div>
+          <div>
+            <div class="bold small" style="margin-bottom:8px">Preference Detection Categories</div>
+            <div class="chips" style="margin-bottom:12px">
+              <span class="chip ch-a">price_deck</span><span class="chip ch-a">financial_threshold</span><span class="chip ch-a">operational</span><span class="chip ch-a">strategic</span><span class="chip ch-a">negotiation</span>
+            </div>
+            <div class="bold small" style="margin-bottom:6px">CLI Commands</div>
+            <div class="small muted">
+              <span class="mono">python -m aigis_agents init-buyer-profile</span><br>
+              <span class="mono">aigis-init-buyer-profile</span><br>
+              <span class="mono">aigis-show-buyer-profile</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item" onclick="togglePhase(this)">
+      <div class="tl-dot done"></div>
+      <div class="tl-phase">Phase B</div>
+      <div class="tl-title">DealContext.md Shared Pipeline State <span class="chip ch-g" style="font-size:10px;vertical-align:middle">✓ COMPLETE</span></div>
+      <div class="tl-desc">Per-deal accumulating markdown that persists findings across pipeline runs. Each agent writes its section; AgentBase auto-persists via _deal_context_section return key. No more agents re-deriving the same facts independently.</div>
+      <div class="chips" style="margin-top:8px"><span class="chip ch-b">deal_context.py</span><span class="chip ch-b">memory/{deal_id}/deal_context.md</span><span class="chip ch-b">memory_manager temporal weighting</span><span class="chip ch-b">step 10.5</span></div>
+      <div class="tl-detail">
+        <div class="two-col">
+          <div>
+            <div class="bold small" style="margin-bottom:8px">DealContextManager API</div>
+            <div class="small muted">
+              <span class="mono">load()</span> → full markdown for LLM injection<br>
+              <span class="mono">update_section(section)</span> → agent writes its section<br>
+              <span class="mono">append_run_log()</span> → append-only run log<br>
+              <span class="mono">get_summary(max_tokens=800)</span> → compressed context<br>
+              <span class="mono">get_section(agent_id, name)</span> → specific section
+            </div>
+          </div>
+          <div>
+            <div class="bold small" style="margin-bottom:8px">Pattern Temporal Weighting</div>
+            <div class="tbl-wrap" style="margin-bottom:0">
+              <table>
+                <thead><tr><th>Weight</th><th>Condition</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="chip ch-g">HIGH</span></td><td class="small muted">Confirmed &lt;90d ago + ≥2 confirmations</td></tr>
+                  <tr><td><span class="chip ch-a">MEDIUM</span></td><td class="small muted">Confirmed &lt;365d ago</td></tr>
+                  <tr><td><span class="chip ch-r">STALE</span></td><td class="small muted">≥365d old — excluded from prompt by default</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item" onclick="togglePhase(this)">
+      <div class="tl-dot done"></div>
+      <div class="tl-phase">Phase C</div>
+      <div class="tl-title">Semantic DK Router <span class="chip ch-g" style="font-size:10px;vertical-align:middle">✓ COMPLETE</span></div>
+      <div class="tl-desc">Embedding-based semantic search augments tag-only DK retrieval. sqlite-vec vector store. Provider-agnostic embeddings (OpenAI, Voyage, local sentence-transformers). Graceful degradation when semantic layer unavailable.</div>
+      <div class="chips" style="margin-top:8px"><span class="chip ch-b">embeddings.py</span><span class="chip ch-b">vector_store.py</span><span class="chip ch-b">semantic_dk_router.py</span><span class="chip ch-b">aigis-index-dk CLI</span></div>
+      <div class="tl-detail">
+        <div class="two-col">
+          <div>
+            <div class="bold small" style="margin-bottom:8px">Two-Phase Retrieval</div>
+            <div class="pipeline">
+              <div class="pip-item">
+                <div class="pip-num-col"><div class="pip-num sub">1</div><div class="pip-line"></div></div>
+                <div class="pip-content"><div class="pip-title">Tag-Based (fast, always on)</div><div class="pip-desc">Agent DK_TAGS → matching playbook files → load full text. Session-cached.</div></div>
+              </div>
+              <div class="pip-item">
+                <div class="pip-num-col"><div class="pip-num sub">2</div></div>
+                <div class="pip-content"><div class="pip-title">Semantic KNN (if AIGIS_EMBEDDING_MODEL set)</div><div class="pip-desc">Embed query → search dk_vectors.db → top-k chunks. Merged with Phase 1 results, deduped by source_file.</div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="bold small" style="margin-bottom:8px">Embedding Model Prefixes</div>
+            <div class="small muted">
+              <span class="mono">openai/text-embedding-3-small</span> → OpenAI API<br>
+              <span class="mono">voyage/voyage-3</span> → Voyage AI<br>
+              <span class="mono">local/all-MiniLM-L6-v2</span> → sentence-transformers<br><br>
+              <span class="mono">aigis-index-dk</span> → chunks + embeds all DK files<br>
+              Vector DB: <span class="mono">aigis_agents/memory/dk_vectors.db</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item" onclick="togglePhase(this)">
+      <div class="tl-dot done"></div>
+      <div class="tl-phase">Phase D</div>
+      <div class="tl-title">Concept Graph + Hidden DK Detector <span class="chip ch-g" style="font-size:10px;vertical-align:middle">✓ COMPLETE</span></div>
+      <div class="tl-desc">SQLite entity knowledge graph (shared with Agent 02 DB). LLM-driven entity/proposition extraction on ingestion. Cross-document contradiction detection. Hidden domain knowledge discovery in non-standard VDR files.</div>
+      <div class="chips" style="margin-top:8px"><span class="chip ch-b">concept_graph.py</span><span class="chip ch-b">entity_extractor.py</span><span class="chip ch-b">hidden_dk_detector.py</span><span class="chip ch-b">agent_base step 5.7</span></div>
+      <div class="tl-detail">
+        <div class="two-col">
+          <div>
+            <div class="bold small" style="margin-bottom:8px">ConceptGraph Data Model</div>
+            <div class="tbl-wrap" style="margin-bottom:0">
+              <table>
+                <thead><tr><th>Component</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td>ConceptNode</td><td class="small muted">entity, metric, concept, event, risk</td></tr>
+                  <tr><td>ConceptEdge</td><td class="small muted">operated_by, produces, tied_back_to, governed_by, contradicts…</td></tr>
+                  <tr><td>Proposition</td><td class="small muted">subject → predicate → object + source_doc + page + confidence</td></tr>
+                  <tr><td>Contradiction</td><td class="small muted">CRITICAL (&gt;20% numeric diff) or WARNING otherwise</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="bold small" style="margin-bottom:8px">HiddenDKDetector Capabilities</div>
+            <div class="small muted">
+              <strong>scan_for_hidden_dk()</strong> — LLM scans doc text against DK file list. Returns DKDiscovery[] with confidence ≥0.5. All require human review.<br><br>
+              <strong>check_contradictions()</strong> — DB-driven via ConceptGraph. No LLM needed. CRITICAL flags when numeric values differ &gt;20% across source docs.<br><br>
+              <strong>Graceful degradation</strong> — All Phase D integrations wrapped in try/except. No failure blocks agent pipeline.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════ TAB: ROADMAP ═══════════════════════════════ -->
+<section class="pane" id="tab-roadmap">
+
+  <div class="sec-title">Full Agent Roadmap</div>
+  <div class="sec-sub">19 agents in registry (agent_03 absorbed into agent_02). 4 in production, 15 planned. Click column headers to sort. Filter by status or tier below.</div>
+
+  <div class="filter-bar">
+    <span class="muted small">Status:</span>
+    <button class="f-btn active" data-filter="status" data-val="">All</button>
+    <button class="f-btn" data-filter="status" data-val="production">Production</button>
+    <button class="f-btn" data-filter="status" data-val="planned">Planned</button>
+    <span class="muted small" style="margin-left:8px">Tier:</span>
+    <button class="f-btn active" data-filter="tier" data-val="">All</button>
+    <button class="f-btn" data-filter="tier" data-val="quick_win">Quick Win</button>
+    <button class="f-btn" data-filter="tier" data-val="medium_lift">Medium Lift</button>
+    <button class="f-btn" data-filter="tier" data-val="strategic_build">Strategic Build</button>
+  </div>
+
+  <div class="tbl-wrap">
+    <table id="roadmapTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable(this,0)">#</th>
+          <th onclick="sortTable(this,1)">Agent Name</th>
+          <th onclick="sortTable(this,2)">Status</th>
+          <th onclick="sortTable(this,3)">Tier</th>
+          <th onclick="sortTable(this,4)">Sprint</th>
+          <th>Key Capability</th>
+          <th>Dependencies</th>
+          <th>Outputs</th>
+        </tr>
+      </thead>
+      <tbody id="roadmapBody">
+        <tr data-status="production" data-tier="quick_win">
+          <td class="bold amber">01</td>
+          <td class="bold">VDR Document Inventory &amp; Gap Analyst</td>
+          <td><span class="dot dot-g"></span><span class="green small">Production</span></td>
+          <td><span class="chip ch-g">Quick Win</span></td>
+          <td>1</td>
+          <td class="small muted">3-stage classification; 87-item checklist; DRL generation</td>
+          <td class="small muted">—</td>
+          <td class="small muted"><span class="mono">gap report</span> · <span class="mono">DRL.docx</span></td>
+        </tr>
+        <tr data-status="production" data-tier="quick_win">
+          <td class="bold amber">02</td>
+          <td class="bold">VDR Financial &amp; Operational Data Store</td>
+          <td><span class="dot dot-g"></span><span class="green small">Production</span></td>
+          <td><span class="chip ch-g">Quick Win</span></td>
+          <td>2</td>
+          <td class="small muted">SQLite DB (13 tables); 3 operation modes; consistency auditor merged</td>
+          <td class="small muted">01, 04</td>
+          <td class="small muted"><span class="mono">02_data_store.db</span></td>
+        </tr>
+        <tr data-status="production" data-tier="quick_win">
+          <td class="bold amber">04</td>
+          <td class="bold">Upstream Finance Calculator</td>
+          <td><span class="dot dot-g"></span><span class="green small">Production</span></td>
+          <td><span class="chip ch-g">Quick Win</span></td>
+          <td>1</td>
+          <td class="small muted">25+ metrics; tornado sensitivity; fiscal regime modelling</td>
+          <td class="small muted">—</td>
+          <td class="small muted"><span class="mono">financial_analysis.md</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="quick_win">
+          <td class="bold">05</td>
+          <td>Commodity Price Forward Curve Fetcher</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-b">Quick Win</span></td>
+          <td>2</td>
+          <td class="small muted">EIA / CME / World Bank price curves; flags aggressive decks</td>
+          <td class="small muted">02</td>
+          <td class="small muted"><span class="mono">price_curves.json</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="quick_win">
+          <td class="bold">06</td>
+          <td>Q&amp;A Synthesis Engine</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-b">Quick Win</span></td>
+          <td>1</td>
+          <td class="small muted">Natural language deal Q&amp;A; routes to specialist agents; cited answers</td>
+          <td class="small muted">01, 02, 04, 05</td>
+          <td class="small muted"><span class="mono">qa_response.md</span></td>
+        </tr>
+        <tr data-status="production" data-tier="quick_win">
+          <td class="bold amber">07</td>
+          <td class="bold">Well Performance Intelligence Cards</td>
+          <td><span class="dot dot-g"></span><span class="green small">Production</span></td>
+          <td><span class="chip ch-g">Quick Win</span></td>
+          <td>3</td>
+          <td class="small muted">scipy Arps DCA; RAG traffic-light (GREEN/AMBER/RED/BLACK); LLM RE narrative; matplotlib PNGs + Plotly HTML dashboard</td>
+          <td class="small muted">02</td>
+          <td class="small muted"><span class="mono">well_report.md</span> · <span class="mono">fleet_dashboard.html</span> · <span class="mono">well_charts/*.png</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="quick_win">
+          <td class="bold">08</td>
+          <td>HSE Red Flag Scanner</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-b">Quick Win</span></td>
+          <td>1</td>
+          <td class="small muted">Tier 1/2 LOPCs; regulatory enforcement; fatalities; open corrective actions</td>
+          <td class="small muted">01</td>
+          <td class="small muted"><span class="mono">hse_risk_summary.md</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="medium_lift">
+          <td class="bold">09</td>
+          <td>JOA / Licence / Contract Key Terms Extractor</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-p">Medium Lift</span></td>
+          <td>3</td>
+          <td class="small muted">Contract Summary Pack; CoC consent, ROFR/ROFO, take-or-pay flags</td>
+          <td class="small muted">01</td>
+          <td class="small muted"><span class="mono">contract_pack.docx</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="medium_lift">
+          <td class="bold">10</td>
+          <td>ARO / Decommissioning Cost Aggregator</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-p">Medium Lift</span></td>
+          <td>3</td>
+          <td class="small muted">P50/P70/P90 ARO estimates; BOEM benchmarking; understated ARO flags</td>
+          <td class="small muted">01, 04</td>
+          <td class="small muted"><span class="mono">aro_waterfall.xlsx</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="medium_lift">
+          <td class="bold">11</td>
+          <td>Regulatory Licence Status Checker</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-p">Medium Lift</span></td>
+          <td>3</td>
+          <td class="small muted">BSEE TIMS / NSTA OGA / NPD cross-reference; expiry flags; enforcement actions</td>
+          <td class="small muted">09</td>
+          <td class="small muted"><span class="mono">consent_tracker.xlsx</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="medium_lift">
+          <td class="bold">12</td>
+          <td>Debt, Hedging &amp; Liability Schedule Builder</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-p">Medium Lift</span></td>
+          <td>4</td>
+          <td class="small muted">Day-1 liability waterfall; hedge MTM; covenant risks; CoC debt triggers</td>
+          <td class="small muted">04, 05</td>
+          <td class="small muted"><span class="mono">liability_waterfall.xlsx</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="medium_lift">
+          <td class="bold">13</td>
+          <td>Comparable Transactions Finder</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-p">Medium Lift</span></td>
+          <td>3</td>
+          <td class="small muted">SEC EDGAR 8-K comps; EV/2P, EV/BOE/d medians; bid calibration context</td>
+          <td class="small muted">—</td>
+          <td class="small muted"><span class="mono">comps_table.xlsx</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="medium_lift">
+          <td class="bold">14</td>
+          <td>Opex &amp; Capex Benchmarking Agent</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-p">Medium Lift</span></td>
+          <td>4</td>
+          <td class="small muted">BSEE / NSTA / IEA benchmark comparison; flags understated cost assumptions</td>
+          <td class="small muted">02, 04</td>
+          <td class="small muted"><span class="mono">cost_benchmarking.md</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="medium_lift">
+          <td class="bold">15</td>
+          <td>Seller Model Reverse-Engineer &amp; Sensitivity Analyser</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-p">Medium Lift</span></td>
+          <td>3</td>
+          <td class="small muted">Re-runs seller model with validated inputs; full sensitivity; flags optimistic assumptions</td>
+          <td class="small muted">02, 04, 05</td>
+          <td class="small muted"><span class="mono">sensitivity.xlsx</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="medium_lift">
+          <td class="bold">16</td>
+          <td>Title &amp; Ownership Chain Validator</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-p">Medium Lift</span></td>
+          <td>4</td>
+          <td class="small muted">Three-way WI% match: JOA / CPR / IM; ROFR waiver gaps; title chain gaps</td>
+          <td class="small muted">09</td>
+          <td class="small muted"><span class="mono">title_chain.md</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="strategic_build">
+          <td class="bold">17</td>
+          <td>CPR Decline Modeller &amp; Forecast Validator</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-o">Strategic</span></td>
+          <td>TBD</td>
+          <td class="small muted">Independent DCA fitting (exp/hyp/harmonic); CPR forecast comparison; buyer P10/P50/P90</td>
+          <td class="small muted">02</td>
+          <td class="small muted"><span class="mono">decline_models.xlsx</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="strategic_build">
+          <td class="bold">18</td>
+          <td>ESG &amp; Carbon Liability Scanner</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-o">Strategic</span></td>
+          <td>TBD</td>
+          <td class="small muted">GHG/methane/flaring; TCFD disclosures; carbon cost NPV impact at multiple price scenarios</td>
+          <td class="small muted">01</td>
+          <td class="small muted"><span class="mono">esg_report.md</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="strategic_build">
+          <td class="bold">19</td>
+          <td>Technical Risk Scoring Engine</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-o">Strategic</span></td>
+          <td>4</td>
+          <td class="small muted">Risk score 0–100; 7 dimensions; IC traffic-light PDF scorecard; aggregates ALL agents</td>
+          <td class="small muted">01,02,04,05,08,09,10,11,12,16</td>
+          <td class="small muted"><span class="mono">risk_scorecard.pdf</span></td>
+        </tr>
+        <tr data-status="planned" data-tier="strategic_build">
+          <td class="bold">20</td>
+          <td>Post-Acquisition Integration Checklist Generator</td>
+          <td><span class="dot dot-m"></span><span class="muted small">Planned</span></td>
+          <td><span class="chip ch-o">Strategic</span></td>
+          <td>4</td>
+          <td class="small muted">100-day integration plan: Day-1 critical / Day-1–30 admin / Day-31–100 operational optimisation</td>
+          <td class="small muted">01,09,11,12,16</td>
+          <td class="small muted"><span class="mono">100day_plan.md</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">Agent Count by Sprint</div>
+    <canvas id="chartSprint" style="max-height:200px"></canvas>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════ TAB: DOMAIN KNOWLEDGE ═══════════════════════════════ -->
+<section class="pane" id="tab-dk">
+
+  <div class="sec-title">Domain Knowledge Library</div>
+  <div class="sec-sub">9 specialist playbooks covering all upstream O&amp;G M&amp;A workstreams. Loaded by agents via DK_TAGS declarations. Phase C adds semantic vector search across all files.</div>
+
+  <div class="grid-2">
+    <div class="chart-wrap">
+      <div class="chart-title">Approximate Size by Playbook (KB)</div>
+      <canvas id="chartDKSize"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">Domain Coverage by Workstream</div>
+      <canvas id="chartWorkstream"></canvas>
+    </div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>DK Tag</th><th>File(s)</th><th>Approx Size</th><th>Agents Using</th><th>Topics Covered</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="chip ch-a">vdr_structure</span></td>
+          <td class="mono small">PART4_VDR_Workflow_Agent_Mapping.md</td>
+          <td class="small muted">~18KB</td>
+          <td class="small muted">01</td>
+          <td class="small muted">VDR platform structures, document categories, folder conventions, classification heuristics</td>
+        </tr>
+        <tr>
+          <td><span class="chip ch-a">checklist</span></td>
+          <td class="mono small">PART1_Header_Taxonomy_Phases.md</td>
+          <td class="small muted">~14KB</td>
+          <td class="small muted">01</td>
+          <td class="small muted">87-item gold-standard DD checklist; phase taxonomy; need-to-have vs good-to-have</td>
+        </tr>
+        <tr>
+          <td><span class="chip ch-a">upstream_dd</span></td>
+          <td class="mono small">upstream_vdr_playbook.md</td>
+          <td class="small muted">~21KB</td>
+          <td class="small muted">01, 02, 04</td>
+          <td class="small muted">Document types by DD workstream; red flag indicators; data quality checks</td>
+        </tr>
+        <tr>
+          <td><span class="chip ch-b">financial</span></td>
+          <td class="mono small">financial_analyst_playbook.md · fiscal_terms_playbook.md</td>
+          <td class="small muted">~54KB total</td>
+          <td class="small muted">02, 04, 12, 13, 14, 15</td>
+          <td class="small muted">Cash flow modelling; valuation multiples; royalty / BPO / PSC fiscal terms; EBITDA conventions</td>
+        </tr>
+        <tr>
+          <td><span class="chip ch-b">technical</span></td>
+          <td class="mono small">technical_analyst_playbook.md</td>
+          <td class="small muted">~22KB</td>
+          <td class="small muted">02, 07, 10</td>
+          <td class="small muted">Reserve classification (SPE-PRMS); decline curves; well performance; facility design; DCA methods</td>
+        </tr>
+        <tr>
+          <td><span class="chip ch-b">legal</span></td>
+          <td class="mono small">legal_analyst_playbook.md</td>
+          <td class="small muted">~16KB</td>
+          <td class="small muted">09, 11, 16</td>
+          <td class="small muted">JOA key clauses; CoC provisions; ROFR/ROFO; licence conditions; change of control triggers</td>
+        </tr>
+        <tr>
+          <td><span class="chip ch-b">esg</span></td>
+          <td class="mono small">esg_analyst_playbook.md</td>
+          <td class="small muted">~16KB</td>
+          <td class="small muted">08, 18</td>
+          <td class="small muted">IOGP HSE standards; TCFD framework; GHG reporting; methane intensity benchmarks; LOPC classification</td>
+        </tr>
+        <tr>
+          <td><span class="chip ch-b">golden_questions</span></td>
+          <td class="mono small">golden_question_checklist.md</td>
+          <td class="small muted">~20KB</td>
+          <td class="small muted">06</td>
+          <td class="small muted">50+ critical Q&amp;A pairs across all DD workstreams; expected answer patterns; red flag triggers</td>
+        </tr>
+        <tr>
+          <td><span class="chip ch-b">oil_gas_101</span></td>
+          <td class="mono small">Upstream Oil &amp; Gas 101 Technical Primer.md</td>
+          <td class="small muted">~36KB</td>
+          <td class="small muted">02, 04</td>
+          <td class="small muted">Production systems; subsea architecture; reservoir basics; unit conversions (6 Mcf:1 BOE); SPE/SEC reserve defs</td>
+        </tr>
+        <tr>
+          <td><span class="chip ch-p">board_dd_report</span></td>
+          <td class="mono small">board_dd_report_playbook.md</td>
+          <td class="small muted">~13KB</td>
+          <td class="small muted">19, 20</td>
+          <td class="small muted">14-section board report; GoM bid convention (PDP PV10 anchor); deal multiples methodology; management vs CPR analysis framework</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="div">
+  <div class="sec-title">Agent 04 — Financial Metrics Reference</div>
+  <div class="sec-sub">25+ metrics computed with full audit trail on every run. Every metric shows formula, inputs used, and source citations.</div>
+
+  <div class="mg-grid">
+    <div class="mg">
+      <div class="mg-title amber">Valuation Metrics</div>
+      <div class="mg-item">NPV at 10% discount (PV10)</div>
+      <div class="mg-item">NPV at custom hurdle rate</div>
+      <div class="mg-item">Value Creation (NPV − Investment)</div>
+      <div class="mg-item">EV / 2P Reserves ($/BOE)</div>
+      <div class="mg-item">EV / 1P Reserves ($/BOE)</div>
+      <div class="mg-item">EV / BOE per day</div>
+      <div class="mg-item">EV / EBITDA</div>
+    </div>
+    <div class="mg">
+      <div class="mg-title blue">Investment Returns</div>
+      <div class="mg-item">IRR (unlevered, after-tax)</div>
+      <div class="mg-item">Payback Period (years)</div>
+      <div class="mg-item">MOIC (Multiple of Invested Capital)</div>
+      <div class="mg-item">Borrowing Base</div>
+      <div class="mg-item">DSCR (Debt Service Coverage Ratio)</div>
+      <div class="mg-item">LLCR (Loan Life Coverage Ratio)</div>
+    </div>
+    <div class="mg">
+      <div class="mg-title green">Production Cost Metrics</div>
+      <div class="mg-item">Lifting Cost / LOE per BOE</div>
+      <div class="mg-item">Total Opex per BOE</div>
+      <div class="mg-item">Netback ($/bbl)</div>
+      <div class="mg-item">Cash Breakeven ($/bbl)</div>
+      <div class="mg-item">Full-Cycle Breakeven ($/bbl)</div>
+    </div>
+    <div class="mg">
+      <div class="mg-title purple">Reserve &amp; Production Metrics</div>
+      <div class="mg-item">EUR (MMBoe)</div>
+      <div class="mg-item">Initial Decline Rate (%/yr)</div>
+      <div class="mg-item">Reserve Replacement Ratio</div>
+      <div class="mg-item">Recycle Ratio (Netback / F&amp;D)</div>
+      <div class="mg-item">Water Cut (%)</div>
+      <div class="mg-item">GOR (scf/bbl)</div>
+    </div>
+    <div class="mg">
+      <div class="mg-title teal">Fiscal Metrics</div>
+      <div class="mg-item">Government Take (%)</div>
+      <div class="mg-item">Net Revenue Interest (NRI)</div>
+      <div class="mg-item">Effective Royalty Rate</div>
+      <div class="mg-item">After-Tax NPV</div>
+      <div class="mg-item">Cost Oil / Profit Oil splits (PSC)</div>
+    </div>
+    <div class="mg">
+      <div class="mg-title orange">Sensitivity Analysis</div>
+      <div class="mg-item">Oil price ± 20%, ± 40%</div>
+      <div class="mg-item">Production volume ± 15%</div>
+      <div class="mg-item">LOE cost ± 20%</div>
+      <div class="mg-item">Capex ± 30%</div>
+      <div class="mg-item">Discount rate 8% / 10% / 15%</div>
+      <div class="mg-item">Tornado chart output</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════ TAB: TEST SUITE ═══════════════════════════════ -->
+<section class="pane" id="tab-tests">
+
+  <div class="stats">
+    <div class="stat"><div class="stat-n green">435</div><div class="stat-l">Tests<br>Passing</div></div>
+    <div class="stat"><div class="stat-n">25</div><div class="stat-l">Test<br>Modules</div></div>
+    <div class="stat"><div class="stat-n">~10.5s</div><div class="stat-l">Full Suite<br>Runtime</div></div>
+    <div class="stat"><div class="stat-n">0</div><div class="stat-l">Tests<br>Failing</div></div>
+    <div class="stat"><div class="stat-n">4</div><div class="stat-l">Agent<br>Modules</div></div>
+    <div class="stat"><div class="stat-n">5</div><div class="stat-l">Mesh<br>Modules</div></div>
+    <div class="stat"><div class="stat-n">5</div><div class="stat-l">Intelligence<br>Layer Modules</div></div>
+    <div class="stat"><div class="stat-n">2</div><div class="stat-l">Integration<br>Modules</div></div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">Test Count by Module (all 25 test files, 435 passing)</div>
+    <canvas id="chartTests" style="max-height:400px"></canvas>
+  </div>
+
+  <div class="sec-title">Test Modules</div>
+  <div class="sec-sub">All tests use MockLLM (keyword-routing) and redirect memory writes to tmp_path to avoid Dropbox file-lock on Windows. Agent 07 DCA/chart tests marked skip when scipy/matplotlib optional deps absent.</div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Module</th><th>File</th><th>Tests</th><th>Coverage</th></tr></thead>
+      <tbody id="testTableBody">
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/agents/test_agent01.py</td><td>10</td><td class="small muted">VDR crawl, classification pipeline, gap scoring, DRL generation, novelty detection</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/agents/test_agent02_db.py</td><td>7</td><td class="small muted">Schema DDL, connection management, upsert_deal ON CONFLICT</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/agents/test_agent02_ingest.py</td><td>13</td><td class="small muted">Excel two-pass, PDF table extraction, CSV parsing, circular ref detection</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/agents/test_agent02_consistency.py</td><td>6</td><td class="small muted">CRITICAL/WARNING/INFO conflict thresholds, cross-source detection</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/agents/test_agent02_query.py</td><td>7</td><td class="small muted">NL→SQL translation, audit_llm validation, blocked keyword checks</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/agents/test_agent04.py</td><td>11</td><td class="small muted">Agent 04 mesh integration, _run() inputs/outputs, DK injection</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/test_agent_04_calculator.py</td><td>44</td><td class="small muted">All 25+ metric calculation functions, fiscal engine, unit conversions</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/test_agent_04_integration.py</td><td>18</td><td class="small muted">End-to-end calculator pipeline, sensitivity analysis, benchmark flagging</td></tr>
+        <tr><td><span class="chip ch-b">Mesh Layer</span></td><td class="mono small">tests/mesh/test_agent_base.py</td><td>9</td><td class="small muted">10-step pipeline, mode switching (standalone/tool_call), error abort path</td></tr>
+        <tr><td><span class="chip ch-b">Mesh Layer</span></td><td class="mono small">tests/mesh/test_audit_layer.py</td><td>9</td><td class="small muted">Input/output auditing, confidence scoring, citation coverage</td></tr>
+        <tr><td><span class="chip ch-b">Mesh Layer</span></td><td class="mono small">tests/mesh/test_domain_knowledge.py</td><td>9</td><td class="small muted">DK router tag loading, session caching, missing file graceful handling</td></tr>
+        <tr><td><span class="chip ch-b">Mesh Layer</span></td><td class="mono small">tests/mesh/test_memory_manager.py</td><td>11</td><td class="small muted">JSON persistence, pattern loading, temporal weighting, auto-apply logic</td></tr>
+        <tr><td><span class="chip ch-b">Mesh Layer</span></td><td class="mono small">tests/mesh/test_toolkit_registry.py</td><td>13</td><td class="small muted">toolkit.json parsing, class resolution, agent status filtering</td></tr>
+        <tr><td><span class="chip ch-p">Intelligence Layer</span></td><td class="mono small">tests/test_buyer_profile.py</td><td>29</td><td class="small muted">BuyerProfileManager wizard, signal detection, profile update, context injection</td></tr>
+        <tr><td><span class="chip ch-p">Intelligence Layer</span></td><td class="mono small">tests/test_deal_context.py</td><td>34</td><td class="small muted">Section update, run log append, get_summary, cross-agent accumulation, temporal weighting</td></tr>
+        <tr><td><span class="chip ch-p">Intelligence Layer</span></td><td class="mono small">tests/test_semantic_dk.py</td><td>42</td><td class="small muted">EmbeddingProvider dispatch, VectorStore upsert/search, SemanticDKRouter two-phase retrieval</td></tr>
+        <tr><td><span class="chip ch-p">Intelligence Layer</span></td><td class="mono small">tests/test_concept_graph.py</td><td>36</td><td class="small muted">Graph CRUD, contradiction detection, CRITICAL/WARNING severity, entity context, EntityExtractor</td></tr>
+        <tr><td><span class="chip ch-p">Intelligence Layer</span></td><td class="mono small">tests/test_hidden_dk.py</td><td>23</td><td class="small muted">Hidden DK scan, confidence filtering, file reading, check_contradictions, DKDiscovery dataclass</td></tr>
+        <tr><td><span class="chip ch-t">Integration</span></td><td class="mono small">tests/integration/test_audit_quality.py</td><td>6</td><td class="small muted">End-to-end audit flows, dual-LLM interaction, JSONL log format</td></tr>
+        <tr><td><span class="chip ch-t">Integration</span></td><td class="mono small">tests/integration/test_mesh_integration.py</td><td>7</td><td class="small muted">Multi-agent coordination, deal context accumulation across agents</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/test_agent07_dca.py</td><td>21</td><td class="small muted">Arps hyperbolic/exponential fit, EUR integration, edge cases (≤5 pts, all-zeros, single product), NumPy 2.0 compat</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/test_agent07_rag.py</td><td>32</td><td class="small muted">RAG classification matrix (rate variance × secondary flags), pattern overrides, GOR/WC/b-factor escalation logic</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/test_agent07_normalization.py</td><td>21</td><td class="small muted">Downtime normalization (with/without uptime data), GOR/WC computation, assumption flag messages</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/test_agent07_charts.py</td><td>12</td><td class="small muted">Chart file creation (matplotlib Agg backend, no pixel-perfect check), Plotly HTML dashboard generation</td></tr>
+        <tr><td><span class="chip ch-g">Agent Layer</span></td><td class="mono small">tests/test_agent07_integration.py</td><td>13</td><td class="small muted">Full Agent07.invoke() with MockLLM + mock SQLite; single-well + fleet modes; standalone + tool_call; no-data edge cases</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:8px">
+    <div class="card-hd"><div class="card-ico">🔧</div><div><div class="card-title">Test Infrastructure Patterns</div><div class="card-sub">Key fixtures and conventions used across the suite</div></div></div>
+    <div class="two-col">
+      <div>
+        <div class="bold small" style="margin-bottom:8px">conftest.py Fixtures</div>
+        <div class="small muted">
+          <strong>mock_llm</strong> — MockLLM with keyword routing; "Input Quality Auditor" → VALID_INPUT_AUDIT, "add_to_checklist" → "[]"<br><br>
+          <strong>patch_toolkit</strong> — redirects _TOOLKIT_PATH to tmp toolkit.json AND _AGENTS_ROOT to tmp_path (avoids Dropbox file-lock)<br><br>
+          <strong>patch_get_chat_model</strong> — monkeypatches LLM factory to return mock_llm for pipeline tests<br><br>
+          <strong>sqlite_conn</strong> — fresh Agent 02 SQLite DB with full schema per test
+        </div>
+      </div>
+      <div>
+        <div class="bold small" style="margin-bottom:8px">Key Test Conventions</div>
+        <div class="small muted">
+          Chunk markdown fixtures must be ≥80 chars per section (matches _CHUNK_MIN_CHARS)<br><br>
+          Contradiction severity tests: use "5000 BOE/d" not "5,000 BOE/d" — regex parses first numeric fragment; comma breaks parsing<br><br>
+          AgentBase entity_context tests use patch_toolkit + patch_get_chat_model from conftest (dict format, not list)<br><br>
+          SemanticDKRouter without API keys: construct __new__ + set _enabled/_provider/_store directly
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+</div><!-- /wrap -->
+
+<!-- ═══════════════════════════════ SCRIPTS ═══════════════════════════════ -->
+<script>
+// ── Mermaid init ──
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark',
+  securityLevel: 'loose',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  fontSize: 13,
+  themeVariables: {
+    background: '#0d1117',
+    primaryColor: '#1c2128',
+    primaryTextColor: '#c9d1d9',
+    primaryBorderColor: '#30363d',
+    lineColor: '#58a6ff',
+    secondaryColor: '#161b22',
+    tertiaryColor: '#0d1117',
+    edgeLabelBackground: '#1c2128',
+    nodeBorder: '#30363d',
+    clusterBkg: '#161b22',
+    titleColor: '#e6edf3',
+    edgeColor: '#58a6ff'
+  }
+});
+
+// ── Tab switching ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    // Trigger chart resize on tab change
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+  });
+});
+
+// ── Accordion ──
+function toggleAcc(hd) {
+  const body = hd.nextElementSibling;
+  const arrow = hd.querySelector('.acc-arrow');
+  const isOpen = hd.classList.contains('open');
+  hd.classList.toggle('open', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
+  body.classList.toggle('open', !isOpen);
+}
+
+// ── Timeline phase expand ──
+function togglePhase(item) {
+  const detail = item.querySelector('.tl-detail');
+  if (!detail) return;
+  detail.classList.toggle('open');
+}
+
+// ── Table sort ──
+function sortTable(th, col) {
+  const table = th.closest('table');
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr:not(.hidden)'));
+  const dir = th.classList.contains('s-asc') ? -1 : 1;
+  table.querySelectorAll('th').forEach(t => t.classList.remove('s-asc', 's-desc'));
+  th.classList.add(dir === 1 ? 's-asc' : 's-desc');
+  rows.sort((a, b) => {
+    const av = (a.cells[col]?.textContent || '').trim();
+    const bv = (b.cells[col]?.textContent || '').trim();
+    const an = parseFloat(av), bn = parseFloat(bv);
+    if (!isNaN(an) && !isNaN(bn)) return dir * (an - bn);
+    return dir * av.localeCompare(bv);
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+// ── Roadmap filter ──
+const activeFilters = { status: '', tier: '' };
+document.querySelectorAll('.f-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const filterType = btn.dataset.filter;
+    document.querySelectorAll(`.f-btn[data-filter="${filterType}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilters[filterType] = btn.dataset.val;
+    applyRoadmapFilter();
+  });
+});
+function applyRoadmapFilter() {
+  document.querySelectorAll('#roadmapBody tr').forEach(row => {
+    const statusMatch = !activeFilters.status || row.dataset.status === activeFilters.status;
+    const tierMatch = !activeFilters.tier || row.dataset.tier === activeFilters.tier;
+    row.classList.toggle('hidden', !(statusMatch && tierMatch));
+  });
+}
+
+// ── Charts ──
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: { legend: { labels: { color: '#8b949e', font: { size: 12 } } } }
+};
+
+Chart.defaults.color = '#8b949e';
+Chart.defaults.borderColor = '#30363d';
+
+// Agent Status donut
+new Chart(document.getElementById('chartStatus'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Production (Live)', 'Planned'],
+    datasets: [{ data: [4, 15], backgroundColor: ['#3fb950', '#30363d'], borderColor: '#0d1117', borderWidth: 2 }]
+  },
+  options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { position: 'bottom', labels: { color: '#8b949e', padding: 16 } } } }
+});
+
+// Agent Tier donut
+new Chart(document.getElementById('chartTier'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Quick Win (7)', 'Medium Lift (8)', 'Strategic Build (4)'],
+    datasets: [{ data: [7, 8, 4], backgroundColor: ['#3fb950', '#bc8cff', '#f78166'], borderColor: '#0d1117', borderWidth: 2 }]
+  },
+  options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { position: 'bottom', labels: { color: '#8b949e', padding: 12 } } } }
+});
+
+// Sprint bar chart
+new Chart(document.getElementById('chartSprint'), {
+  type: 'bar',
+  data: {
+    labels: ['Sprint 1', 'Sprint 2', 'Sprint 3', 'Sprint 4', 'TBD'],
+    datasets: [{
+      label: 'Agents',
+      data: [4, 2, 6, 5, 2],
+      backgroundColor: ['#3fb950', '#58a6ff', '#bc8cff', '#f78166', '#30363d'],
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+      y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e', stepSize: 1 } }
+    }
+  }
+});
+
+// DK file size bar
+new Chart(document.getElementById('chartDKSize'), {
+  type: 'bar',
+  data: {
+    labels: ['oil_gas_101', 'fiscal_terms', 'financial', 'technical', 'golden_questions', 'upstream_dd', 'esg', 'legal', 'board_dd_report'],
+    datasets: [{
+      label: 'Approx KB',
+      data: [36, 35, 19, 22, 20, 21, 16, 16, 13],
+      backgroundColor: '#f0a500',
+      borderRadius: 3, borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    ...chartDefaults,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+      y: { grid: { color: 'transparent' }, ticks: { color: '#c9d1d9', font: { size: 11 } } }
+    }
+  }
+});
+
+// Workstream radar
+new Chart(document.getElementById('chartWorkstream'), {
+  type: 'radar',
+  data: {
+    labels: ['Financial', 'Technical', 'Legal', 'ESG/HSE', 'VDR Process', 'Fiscal', 'Market Intel'],
+    datasets: [{
+      label: 'Playbook Coverage',
+      data: [90, 80, 70, 65, 85, 80, 50],
+      backgroundColor: 'rgba(88,166,255,0.15)',
+      borderColor: '#58a6ff',
+      pointBackgroundColor: '#58a6ff',
+      pointRadius: 4
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    scales: {
+      r: {
+        angleLines: { color: '#30363d' },
+        grid: { color: '#30363d' },
+        pointLabels: { color: '#c9d1d9', font: { size: 11 } },
+        ticks: { color: '#8b949e', backdropColor: 'transparent', stepSize: 20 }
+      }
+    }
+  }
+});
+
+// Test count bar
+const testLabels = [
+  'test_agent_04_calculator','test_deal_context','test_semantic_dk','test_concept_graph',
+  'test_buyer_profile','test_agent_04_integration','test_hidden_dk','test_agent02_ingest',
+  'test_agent01','test_toolkit_registry','test_agent04','test_memory_manager',
+  'test_agent_base','test_audit_layer','test_domain_knowledge','test_agent02_query',
+  'test_agent02_db','test_agent02_consistency','test_mesh_integration','test_audit_quality',
+  'test_agent07_rag','test_agent07_normalization','test_agent07_integration',
+  'test_agent07_dca','test_agent07_charts'
+];
+// Counts reflect passing tests (435 total = 344 baseline + 91 Agent07). Some DCA/chart tests skipped (scipy optional dep).
+const testCounts = [44,34,42,36,29,18,23,13,10,13,11,11,9,9,9,7,7,6,7,6,32,21,13,13,12];
+const testColors = testLabels.map(l => {
+  if (l.includes('calculator') || l.includes('agent01') || l.includes('agent02') || l.includes('agent04') || l.includes('integration') && !l.includes('mesh')) return '#3fb950';
+  if (l.includes('buyer') || l.includes('deal_context') || l.includes('semantic') || l.includes('concept') || l.includes('hidden')) return '#bc8cff';
+  if (l.includes('mesh_integration') || l.includes('audit_quality')) return '#39d3bb';
+  return '#58a6ff';
+});
+
+new Chart(document.getElementById('chartTests'), {
+  type: 'bar',
+  data: {
+    labels: testLabels,
+    datasets: [{
+      label: 'Tests',
+      data: testCounts,
+      backgroundColor: testColors,
+      borderRadius: 3, borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    ...chartDefaults,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.raw} tests`,
+          afterLabel: ctx => {
+            const colors = { '#3fb950': 'Agent Layer', '#bc8cff': 'Intelligence Layer', '#39d3bb': 'Integration', '#58a6ff': 'Mesh Layer' };
+            return `  ${colors[testColors[ctx.dataIndex]] || ''}`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+      y: { grid: { color: 'transparent' }, ticks: { color: '#c9d1d9', font: { family: 'monospace', size: 11 } } }
+    }
+  }
+});
+
+// ── Legend for test chart ──
+document.getElementById('chartTests').closest('.chart-wrap').insertAdjacentHTML('beforeend', `
+  <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+    <span style="font-size:11px;color:#3fb950">■ Agent Layer</span>
+    <span style="font-size:11px;color:#58a6ff">■ Mesh Layer</span>
+    <span style="font-size:11px;color:#bc8cff">■ Intelligence Layer</span>
+    <span style="font-size:11px;color:#39d3bb">■ Integration</span>
+  </div>
+`);
+</script>
+</body>
+</html>

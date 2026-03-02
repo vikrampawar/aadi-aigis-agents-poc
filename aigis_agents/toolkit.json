@@ -270,37 +270,56 @@
     "agent_07": {
       "id": "agent_07",
       "name": "Well Performance Intelligence Cards",
-      "description": "Generates a one-page Well Intelligence Card per well summarising all key performance metrics, trends, and a status flag (Outperformer / On-track / Underperformer / Shut-in). Fleet-level summary included.",
-      "status": "planned",
-      "agent_version": null,
+      "description": "Generates a Well Intelligence Card per well with DCA (Arps), RAG traffic-light status, GOR/WC trend surveillance, downtime normalization, and CPR forecast variance. Fleet-level MD report + Plotly HTML dashboard in standalone mode; compact JSON card in tool_call mode.",
+      "status": "production",
+      "agent_version": "1.0",
       "tier": "quick_win",
       "sprint": 3,
-      "module_path": null,
+      "module_path": "aigis_agents.agent_07_well_cards.agent",
       "invoke_fn": null,
-      "mesh_class": null,
+      "mesh_class": "aigis_agents.agent_07_well_cards.agent.Agent07",
       "llm_defaults": {
         "main_model": "gpt-4.1",
         "audit_model": "gpt-4.1-mini"
       },
       "input_params": {
-        "deal_id":      {"type": "str", "required": true},
-        "wells":        {"type": "str", "required": false, "default": "all", "description": "Comma-separated well names or 'all'"},
-        "output_dir":   {"type": "str", "required": false, "default": "./outputs"},
-        "main_model":   {"type": "str", "required": false, "default": "gpt-4.1"},
-        "main_api_key": {"type": "str", "required": false},
-        "audit_model":  {"type": "str", "required": false, "default": "gpt-4.1-mini"},
-        "audit_api_key":{"type": "str", "required": false}
+        "deal_id":               {"type": "str",   "required": true,  "description": "Deal UUID — must match records in Agent 02 data store"},
+        "well_name":             {"type": "str",   "required": false, "default": null, "description": "Specific well entity_name. If null, runs fleet analysis over all wells."},
+        "downtime_treatment":    {"type": "str",   "required": false, "default": "strip_estimated", "enum": ["strip_estimated", "as_reported"], "description": "strip_estimated divides actuals by uptime factor; as_reported uses raw values"},
+        "default_uptime_pct":    {"type": "float", "required": false, "default": 90.0, "description": "Assumed uptime % when no VDR uptime data is available (GoM subsea benchmark: 88-92%)"},
+        "forecast_case":         {"type": "str",   "required": false, "default": "cpr_base_case", "description": "case_name in production_series to use as CPR forecast baseline"},
+        "economic_limit_boepd":  {"type": "float", "required": false, "default": 25.0, "description": "BOE/d rate below which well is considered uneconomic for EUR calculation"},
+        "projection_years":      {"type": "int",   "required": false, "default": 20,   "description": "Years to project decline curve for EUR calculation"},
+        "output_dir":            {"type": "str",   "required": false, "default": "./outputs"},
+        "main_model":            {"type": "str",   "required": false, "default": "gpt-4.1"},
+        "main_api_key":          {"type": "str",   "required": false},
+        "audit_model":           {"type": "str",   "required": false, "default": "gpt-4.1-mini"},
+        "audit_api_key":         {"type": "str",   "required": false}
       },
       "output": {
-        "standalone": {"files": ["07_well_cards.pdf", "07_well_portfolio_summary.xlsx"]},
-        "tool_call": {"schema": {"status": "str", "well_cards": "list[dict]", "portfolio_summary": "dict"}}
+        "standalone": {
+          "files": ["07_well_performance_report.md", "07_fleet_dashboard.html", "07_well_charts/"],
+          "summary_keys": ["total_wells", "rag_summary", "fleet_metrics", "well_cards"]
+        },
+        "tool_call": {
+          "schema": {
+            "status": "str",
+            "well_name": "str",
+            "rag_status": "str",
+            "rag_label": "str",
+            "metrics": "dict",
+            "decline_curve": "dict",
+            "flags": "list[str]",
+            "narrative": "str"
+          }
+        }
       },
       "dependencies": {
-        "agents": ["agent_02", "agent_04"],
-        "domain_knowledge_tags": ["technical", "upstream_dd"],
+        "agents": ["agent_02"],
+        "domain_knowledge_tags": ["technical", "upstream_dd", "oil_gas_101"],
         "external_apis": []
       },
-      "memory_keys": []
+      "memory_keys": ["gom_b_factor_range", "gom_uptime_benchmark", "gor_threshold_gas_condensate"]
     },
 
     "agent_08": {
